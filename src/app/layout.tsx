@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { AntdRegistry } from '@ant-design/nextjs-registry'
-// import { ClerkProvider } from '@clerk/nextjs'
+import { ClerkProvider } from '@clerk/nextjs'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -17,7 +17,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    // <ClerkProvider>
+    <ClerkProvider>
       <html lang="pt-BR">
         <body className={inter.className}>
           <AntdRegistry>
@@ -25,7 +25,7 @@ export default function RootLayout({
           </AntdRegistry>
         </body>
       </html>
-    // </ClerkProvider>
+    </ClerkProvider>
   )
 }
 

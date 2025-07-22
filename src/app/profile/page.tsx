@@ -28,19 +28,13 @@ import {
 } from '@ant-design/icons'
 import Link from 'next/link'
 import AppLayout from '@/components/Layout/AppLayout'
-// import { useUser } from '@clerk/nextjs'
+import { useUser } from '@clerk/nextjs'
 
 const { Title, Paragraph } = Typography
 const { TabPane } = Tabs
 
 export default function ProfilePage() {
-  // const { user } = useUser()
-  const user = {
-    firstName: 'Maria',
-    lastName: 'Silva',
-    emailAddresses: [{ emailAddress: 'maria.silva@email.com' }],
-    imageUrl: null
-  }
+  const { user } = useUser()
   const [activeTab, setActiveTab] = useState('overview')
 
   // Dados mock do perfil

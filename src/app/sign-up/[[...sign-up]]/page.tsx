@@ -1,19 +1,17 @@
 'use client'
 
-// import { SignUp } from '@clerk/nextjs'
-import { Card, Typography, Row, Col, Button, Form, Input, Select } from 'antd'
+import { SignUp } from '@clerk/nextjs'
+import { Card, Typography, Row, Col } from 'antd'
 import { 
   BookOutlined, 
   DollarOutlined, 
   UserOutlined,
   CheckCircleOutlined,
-  LockOutlined,
-  MailOutlined
+  StarOutlined,
+  ShieldCheckOutlined
 } from '@ant-design/icons'
-import Link from 'next/link'
 
 const { Title, Paragraph } = Typography
-const { Option } = Select
 
 export default function SignUpPage() {
   const benefits = [
@@ -31,6 +29,16 @@ export default function SignUpPage() {
       icon: <UserOutlined className="text-purple-600 text-xl" />,
       title: 'Comunidade de Educadores',
       description: 'Conecte-se com outros professores e compartilhe experiências'
+    },
+    {
+      icon: <StarOutlined className="text-yellow-600 text-xl" />,
+      title: 'Avaliações e Feedback',
+      description: 'Receba feedback valioso e melhore continuamente seus materiais'
+    },
+    {
+      icon: <ShieldCheckOutlined className="text-indigo-600 text-xl" />,
+      title: 'Plataforma Segura',
+      description: 'Transações protegidas e ambiente seguro para todos os usuários'
     }
   ]
 
@@ -50,146 +58,83 @@ export default function SignUpPage() {
               
               <Paragraph className="text-lg text-gray-600 mb-8">
                 Transforme sua paixão por ensinar em uma fonte de renda. 
-                Conecte-se com milhares de educadores e alunos.
+                Conecte-se com milhares de educadores e alunos em todo o Brasil.
               </Paragraph>
 
-              <div className="space-y-6">
+              <div className="space-y-4">
                 {benefits.map((benefit, index) => (
-                  <div key={index} className="flex items-start space-x-4">
-                    <div className="flex-shrink-0 w-12 h-12 bg-white rounded-lg shadow-md flex items-center justify-center">
+                  <div key={index} className="flex items-start space-x-3">
+                    <div className="flex-shrink-0 w-10 h-10 bg-white rounded-lg shadow-md flex items-center justify-center">
                       {benefit.icon}
                     </div>
                     <div>
-                      <Title level={4} className="mb-1">
+                      <Title level={5} className="mb-1">
                         {benefit.title}
                       </Title>
-                      <Paragraph className="text-gray-600 mb-0">
+                      <Paragraph className="text-gray-600 mb-0 text-sm">
                         {benefit.description}
                       </Paragraph>
                     </div>
                   </div>
                 ))}
               </div>
+
+              <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                <div className="flex items-center space-x-2 mb-2">
+                  <CheckCircleOutlined className="text-blue-600" />
+                  <Title level={5} className="mb-0 text-blue-800">
+                    Cadastro 100% Gratuito
+                  </Title>
+                </div>
+                <Paragraph className="text-blue-700 mb-0 text-sm">
+                  Sem taxas de inscrição. Comece a vender hoje mesmo!
+                </Paragraph>
+              </div>
             </div>
           </Col>
 
           <Col xs={24} lg={12}>
-            <Card className="shadow-xl border-0 max-w-md mx-auto">
-              <div className="text-center mb-6">
-                <Title level={3} className="mb-2">
-                  Criar Conta
-                </Title>
-                <Paragraph className="text-gray-600">
-                  Preencha os dados abaixo para começar
-                </Paragraph>
-              </div>
-
-              <Form
-                name="signup"
-                layout="vertical"
-                onFinish={(values) => {
-                  console.log('Cadastro:', values)
-                  // Aqui seria a integração com autenticação
-                }}
-              >
-                <Form.Item
-                  name="name"
-                  label="Nome Completo"
-                  rules={[{ required: true, message: 'Por favor, insira seu nome!' }]}
-                >
-                  <Input 
-                    prefix={<UserOutlined />} 
-                    placeholder="Seu nome completo"
-                    size="large"
-                  />
-                </Form.Item>
-
-                <Form.Item
-                  name="email"
-                  label="Email"
-                  rules={[
-                    { required: true, message: 'Por favor, insira seu email!' },
-                    { type: 'email', message: 'Email inválido!' }
-                  ]}
-                >
-                  <Input 
-                    prefix={<MailOutlined />} 
-                    placeholder="seu@email.com"
-                    size="large"
-                  />
-                </Form.Item>
-
-                <Form.Item
-                  name="userType"
-                  label="Tipo de Usuário"
-                  rules={[{ required: true, message: 'Selecione o tipo de usuário!' }]}
-                >
-                  <Select placeholder="Selecione..." size="large">
-                    <Option value="teacher">Professor/Educador</Option>
-                    <Option value="buyer">Comprador</Option>
-                    <Option value="both">Ambos</Option>
-                  </Select>
-                </Form.Item>
-
-                <Form.Item
-                  name="password"
-                  label="Senha"
-                  rules={[
-                    { required: true, message: 'Por favor, insira sua senha!' },
-                    { min: 6, message: 'Senha deve ter pelo menos 6 caracteres!' }
-                  ]}
-                >
-                  <Input.Password 
-                    prefix={<LockOutlined />} 
-                    placeholder="Sua senha"
-                    size="large"
-                  />
-                </Form.Item>
-
-                <Form.Item
-                  name="confirmPassword"
-                  label="Confirmar Senha"
-                  dependencies={['password']}
-                  rules={[
-                    { required: true, message: 'Por favor, confirme sua senha!' },
-                    ({ getFieldValue }) => ({
-                      validator(_, value) {
-                        if (!value || getFieldValue('password') === value) {
-                          return Promise.resolve()
-                        }
-                        return Promise.reject(new Error('As senhas não coincidem!'))
-                      },
-                    }),
-                  ]}
-                >
-                  <Input.Password 
-                    prefix={<LockOutlined />} 
-                    placeholder="Confirme sua senha"
-                    size="large"
-                  />
-                </Form.Item>
-
-                <Form.Item>
-                  <Button 
-                    type="primary" 
-                    htmlType="submit" 
-                    size="large"
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 border-0 hover:from-blue-700 hover:to-purple-700"
-                  >
+            <div className="max-w-md mx-auto">
+              <Card className="shadow-xl border-0 rounded-2xl overflow-hidden">
+                <div className="text-center mb-6 p-6 pb-0">
+                  <Title level={3} className="mb-2">
                     Criar Conta
-                  </Button>
-                </Form.Item>
-              </Form>
+                  </Title>
+                  <Paragraph className="text-gray-600">
+                    Preencha os dados abaixo para começar
+                  </Paragraph>
+                </div>
 
-              <div className="text-center">
-                <Paragraph className="text-gray-600">
-                  Já tem uma conta?{' '}
-                  <Link href="/sign-in" className="text-blue-600 hover:text-blue-700 font-medium">
-                    Entre aqui
-                  </Link>
-                </Paragraph>
-              </div>
-            </Card>
+                <div className="px-6 pb-6">
+                  <SignUp 
+                    appearance={{
+                      elements: {
+                        formButtonPrimary: 
+                          'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-sm normal-case',
+                        card: 'shadow-none',
+                        headerTitle: 'hidden',
+                        headerSubtitle: 'hidden',
+                        socialButtonsBlockButton: 
+                          'border-gray-200 hover:bg-gray-50 text-gray-700',
+                        formFieldInput: 
+                          'border-gray-200 focus:border-blue-500 focus:ring-blue-500',
+                        footerActionLink: 
+                          'text-blue-600 hover:text-blue-700',
+                        identityPreviewText: 'text-gray-600',
+                        identityPreviewEditButton: 'text-blue-600 hover:text-blue-700',
+                        formFieldLabel: 'text-gray-700 font-medium',
+                        dividerLine: 'bg-gray-200',
+                        dividerText: 'text-gray-500'
+                      },
+                      layout: {
+                        socialButtonsPlacement: 'bottom',
+                        socialButtonsVariant: 'blockButton'
+                      }
+                    }}
+                  />
+                </div>
+              </Card>
+            </div>
           </Col>
         </Row>
       </div>
