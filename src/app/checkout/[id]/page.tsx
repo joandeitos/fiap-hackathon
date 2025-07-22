@@ -1,21 +1,22 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { 
-  Typography, 
   Card, 
-  Row, 
-  Col, 
-  Button,
-  Form,
-  Input,
-  Radio,
+  Button, 
+  Steps, 
+  Form, 
+  Input, 
+  Select, 
+  Radio, 
+  Typography, 
   Divider,
-  Steps,
+  Space,
   message,
   Spin,
-  Avatar,
-  Tag
+  Row,
+  Col,
+  Alert
 } from 'antd'
 import { 
   CreditCardOutlined,
@@ -25,136 +26,160 @@ import {
   CheckCircleOutlined,
   UserOutlined
 } from '@ant-design/icons'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import AppLayout from '@/components/Layout/AppLayout'
+import { getProduct, createSale, Product } from '@/lib/supabase-api'
 import { useUser } from '@clerk/nextjs'
 
-const { Title, Paragraph } = Typography
+const { Title, Paragraph, Text } = Typography
 const { Step } = Steps
-
-interface Product {
-  id: number
-  title: string
-  description: string
-  price: number
-  author: string
-  authorAvatar?: string
-  category: string
-  rating: number
-  downloadCount: number
-}
 
 export default function CheckoutPage() {
   const params = useParams()
+  const searchParams = useSearchParams()
   const router = useRouter()
   const { user, isSignedIn } = useUser()
-  const [product, setProduct] = useState<Product | null>(null)
+  
+  const productId = params.id as string
+  const isMultiple = productId === 'multiple'
+  const productIds = isMultiple ? searchParams?.get('products')?.split(',') || [] : [productId]
+  
+  const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [currentStep, setCurrentStep] = useState(0)
-  const [paymentMethod, setPaymentMethod] = useState('credit_card')
   const [processing, setProcessing] = useState(false)
   const [form] = Form.useForm()
 
-  // Produto mock baseado no ID
-  const mockProduct: Product = {
-    id: Number(params.id),
-    title: 'Plano de Aula: Matemática Básica - Frações',
-    description: 'Conjunto completo de atividades para ensinar frações de forma lúdica e interativa. Inclui exercícios práticos, jogos e avaliações.',
-    price: 15.90,
-    author: 'Prof. Maria Silva',
-    authorAvatar: undefined,
-    category: 'Matemática',
-    rating: 4.8,
-    downloadCount: 156
-  }
-
   useEffect(() => {
-    // Verificar se usuário está logado
     if (!isSignedIn) {
       message.warning('Você precisa estar logado para fazer uma compra')
       router.push('/sign-in')
       return
     }
+    
+    loadProducts()
+  }, [productIds, isSignedIn])
 
-    const fetchProduct = async () => {
-      try {
-        setLoading(true)
-        // Simular carregamento do produto
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        setProduct(mockProduct)
-      } catch (error) {
-        console.error('Erro ao carregar produto:', error)
-        message.error('Erro ao carregar produto')
-        router.push('/produtos')
-      } finally {
-        setLoading(false)
+  const loadProducts = async () => {
+    setLoading(true)
+    try {
+      const loadedProducts: Product[] = []
+      
+      for (const id of productIds) {
+        const response = await getProduct(id)
+        if (response.success && response.data) {
+          loadedProducts.push(response.data)
+        }
       }
+      
+      if (loadedProducts.length === 0) {
+        message.error('Produto(s) não encontrado(s)')
+        router.push('/produtos')
+        return
+      }
+      
+      setProducts(loadedProducts)
+    } catch (error) {
+      console.error('Error loading products:', error)
+      message.error('Erro ao carregar produto(s)')
+      router.push('/produtos')
+    } finally {
+      setLoading(false)
     }
+  }
 
-    fetchProduct()
-  }, [params.id, isSignedIn, router])
+  const calculateTotal = () => {
+    return products.reduce((total, product) => total + product.price, 0)
+  }
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(price)
+  }
 
   const handlePayment = async (values: any) => {
+    if (!user) {
+      message.error('Usuário não autenticado')
+      return
+    }
+
     setProcessing(true)
     try {
-      // Simular processamento do pagamento
-      await new Promise(resolve => setTimeout(resolve, 2000))
+      const sales = []
       
-      setCurrentStep(2) // Ir para step de confirmação
-      message.success('Pagamento processado com sucesso!')
+      for (const product of products) {
+        const saleData = {
+          product_id: product.id,
+          buyer_id: user.id,
+          seller_id: product.author_id,
+          amount: product.price,
+          payment_method: values.paymentMethod,
+          payment_id: `pay_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        }
+        
+        const response = await createSale(saleData)
+        if (response.success && response.data) {
+          sales.push(response.data)
+        } else {
+          throw new Error(response.error || 'Erro ao processar venda')
+        }
+      }
       
-      // Redirecionar após alguns segundos
-      setTimeout(() => {
-        router.push('/compras')
-      }, 3000)
-    } catch (error) {
-      message.error('Erro ao processar pagamento')
+      message.success('Compra realizada com sucesso!')
+      setCurrentStep(2)
+      
+    } catch (error: any) {
+      console.error('Error processing payment:', error)
+      message.error(error.message || 'Erro ao processar pagamento')
     } finally {
       setProcessing(false)
     }
   }
 
-  const paymentMethods = [
+  const steps = [
     {
-      value: 'credit_card',
-      label: 'Cartão de Crédito',
-      icon: <CreditCardOutlined />,
-      description: 'Visa, Mastercard, Elo'
+      title: 'Revisão',
+      description: 'Confirme os itens'
     },
     {
-      value: 'debit_card',
-      label: 'Cartão de Débito',
-      icon: <BankOutlined />,
-      description: 'Débito online'
+      title: 'Pagamento',
+      description: 'Escolha a forma de pagamento'
     },
     {
-      value: 'pix',
-      label: 'PIX',
-      icon: <QrcodeOutlined />,
-      description: 'Pagamento instantâneo'
+      title: 'Confirmação',
+      description: 'Finalize a compra'
     }
   ]
 
   if (loading) {
     return (
       <AppLayout>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <Spin size="large" />
+        <div className="max-w-4xl mx-auto py-8">
+          <div className="text-center py-12">
+            <Spin size="large" />
+          </div>
         </div>
       </AppLayout>
     )
   }
 
-  if (!product) {
+  if (!isSignedIn) {
     return (
       <AppLayout>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="text-center">
-            <Title level={3}>Produto não encontrado</Title>
-            <Button type="primary" onClick={() => router.push('/produtos')}>
-              Voltar aos Produtos
-            </Button>
-          </div>
+        <div className="max-w-4xl mx-auto py-8">
+          <Alert
+            message="Login Necessário"
+            description="Você precisa estar logado para fazer uma compra."
+            type="warning"
+            showIcon
+            action={
+              <Button type="primary" onClick={() => router.push('/sign-in')}>
+                Fazer Login
+              </Button>
+            }
+          />
         </div>
       </AppLayout>
     )
@@ -162,42 +187,45 @@ export default function CheckoutPage() {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-4xl mx-auto px-4">
-          {/* Header */}
-          <div className="mb-8">
-            <Title level={2}>Finalizar Compra</Title>
-            <Steps current={currentStep} className="mt-4">
-              <Step title="Revisão" />
-              <Step title="Pagamento" />
-              <Step title="Confirmação" />
-            </Steps>
-          </div>
+      <div className="max-w-4xl mx-auto py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <Title level={2}>Finalizar Compra</Title>
+          <Paragraph className="text-gray-600">
+            Complete sua compra de forma segura
+          </Paragraph>
+        </div>
 
-          <Row gutter={[24, 24]}>
-            {/* Coluna Principal */}
-            <Col xs={24} lg={16}>
-              {currentStep === 0 && (
-                <Card title="Revisar Pedido">
-                  <div className="flex items-start space-x-4 mb-6">
-                    <Avatar 
-                      src={product.authorAvatar} 
-                      icon={<UserOutlined />}
-                      size={64}
-                    />
-                    <div className="flex-1">
-                      <Title level={4} className="mb-2">{product.title}</Title>
-                      <Paragraph className="text-gray-600 mb-2">
-                        {product.description}
-                      </Paragraph>
-                      <div className="flex items-center space-x-4 text-sm text-gray-500">
-                        <span>por {product.author}</span>
-                        <Tag color="blue">{product.category}</Tag>
-                        <span>⭐ {product.rating} ({product.downloadCount} downloads)</span>
+        {/* Steps */}
+        <Card className="mb-6">
+          <Steps current={currentStep} items={steps} />
+        </Card>
+
+        <Row gutter={[24, 24]}>
+          {/* Main Content */}
+          <Col xs={24} lg={16}>
+            {currentStep === 0 && (
+              <Card title="Revisão do Pedido">
+                <div className="space-y-4">
+                  {products.map((product) => (
+                    <div key={product.id} className="flex items-start space-x-4 p-4 border rounded-lg">
+                      <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                        <UserOutlined className="text-2xl text-gray-400" />
+                      </div>
+                      <div className="flex-1">
+                        <Title level={5}>{product.title}</Title>
+                        <div className="flex items-center space-x-2 mb-2">
+                          <UserOutlined className="text-gray-400" />
+                          <Text className="text-gray-600">{product.author?.name}</Text>
+                        </div>
+                        <Text strong className="text-lg text-blue-600">
+                          {formatPrice(product.price)}
+                        </Text>
                       </div>
                     </div>
-                  </div>
-                  <div className="text-right">
+                  ))}
+                  
+                  <div className="text-right pt-4 border-t">
                     <Button 
                       type="primary" 
                       size="large"
@@ -206,180 +234,172 @@ export default function CheckoutPage() {
                       Continuar para Pagamento
                     </Button>
                   </div>
-                </Card>
-              )}
-
-              {currentStep === 1 && (
-                <Card title="Método de Pagamento">
-                  <Form
-                    form={form}
-                    layout="vertical"
-                    onFinish={handlePayment}
-                  >
-                    <Form.Item name="paymentMethod" initialValue={paymentMethod}>
-                      <Radio.Group 
-                        value={paymentMethod} 
-                        onChange={(e) => setPaymentMethod(e.target.value)}
-                        className="w-full"
-                      >
-                        <div className="space-y-3">
-                          {paymentMethods.map((method) => (
-                            <Radio.Button 
-                              key={method.value} 
-                              value={method.value}
-                              className="w-full h-auto p-4 text-left"
-                            >
-                              <div className="flex items-center space-x-3">
-                                <div className="text-xl">{method.icon}</div>
-                                <div>
-                                  <div className="font-medium">{method.label}</div>
-                                  <div className="text-sm text-gray-500">
-                                    {method.description}
-                                  </div>
-                                </div>
-                              </div>
-                            </Radio.Button>
-                          ))}
-                        </div>
-                      </Radio.Group>
-                    </Form.Item>
-
-                    {paymentMethod === 'credit_card' && (
-                      <div className="space-y-4">
-                        <Form.Item
-                          name="cardNumber"
-                          label="Número do Cartão"
-                          rules={[{ required: true, message: 'Digite o número do cartão' }]}
-                        >
-                          <Input 
-                            placeholder="1234 5678 9012 3456"
-                            prefix={<CreditCardOutlined />}
-                            maxLength={19}
-                          />
-                        </Form.Item>
-                        <Row gutter={16}>
-                          <Col span={12}>
-                            <Form.Item
-                              name="expiryDate"
-                              label="Validade"
-                              rules={[{ required: true, message: 'Digite a validade' }]}
-                            >
-                              <Input placeholder="MM/AA" maxLength={5} />
-                            </Form.Item>
-                          </Col>
-                          <Col span={12}>
-                            <Form.Item
-                              name="cvv"
-                              label="CVV"
-                              rules={[{ required: true, message: 'Digite o CVV' }]}
-                            >
-                              <Input 
-                                placeholder="123" 
-                                maxLength={4}
-                                prefix={<LockOutlined />}
-                              />
-                            </Form.Item>
-                          </Col>
-                        </Row>
-                        <Form.Item
-                          name="cardName"
-                          label="Nome no Cartão"
-                          rules={[{ required: true, message: 'Digite o nome no cartão' }]}
-                        >
-                          <Input placeholder="Nome como está no cartão" />
-                        </Form.Item>
-                      </div>
-                    )}
-
-                    {paymentMethod === 'pix' && (
-                      <div className="text-center py-8">
-                        <QrcodeOutlined className="text-6xl text-blue-600 mb-4" />
-                        <Paragraph>
-                          Após confirmar, você receberá o código PIX para pagamento
-                        </Paragraph>
-                      </div>
-                    )}
-
-                    <div className="flex justify-between mt-6">
-                      <Button onClick={() => setCurrentStep(0)}>
-                        Voltar
-                      </Button>
-                      <Button 
-                        type="primary" 
-                        htmlType="submit"
-                        loading={processing}
-                        size="large"
-                      >
-                        {processing ? 'Processando...' : `Pagar R$ ${product.price.toFixed(2)}`}
-                      </Button>
-                    </div>
-                  </Form>
-                </Card>
-              )}
-
-              {currentStep === 2 && (
-                <Card>
-                  <div className="text-center py-8">
-                    <CheckCircleOutlined className="text-6xl text-green-600 mb-4" />
-                    <Title level={3} className="text-green-600 mb-4">
-                      Compra Realizada com Sucesso!
-                    </Title>
-                    <Paragraph className="text-lg mb-6">
-                      Seu material já está disponível para download na área de compras.
-                    </Paragraph>
-                    <div className="space-x-4">
-                      <Button type="primary" onClick={() => router.push('/compras')}>
-                        Ver Minhas Compras
-                      </Button>
-                      <Button onClick={() => router.push('/produtos')}>
-                        Continuar Comprando
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
-              )}
-            </Col>
-
-            {/* Sidebar - Resumo */}
-            <Col xs={24} lg={8}>
-              <Card title="Resumo do Pedido" className="sticky top-4">
-                <div className="space-y-4">
-                  <div className="flex justify-between">
-                    <span>Subtotal:</span>
-                    <span>R$ {product.price.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Taxa de processamento:</span>
-                    <span>R$ 0,00</span>
-                  </div>
-                  <Divider />
-                  <div className="flex justify-between text-lg font-bold">
-                    <span>Total:</span>
-                    <span>R$ {product.price.toFixed(2)}</span>
-                  </div>
-                </div>
-
-                <Divider />
-
-                <div className="text-center text-sm text-gray-500">
-                  <LockOutlined className="mr-1" />
-                  Pagamento 100% seguro
-                </div>
-
-                <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                  <div className="text-sm">
-                    <div className="font-medium text-blue-800 mb-1">
-                      ✓ Download imediato
-                    </div>
-                    <div className="text-blue-600">
-                      Acesso vitalício ao material
-                    </div>
-                  </div>
                 </div>
               </Card>
-            </Col>
-          </Row>
-        </div>
+            )}
+
+            {currentStep === 1 && (
+              <Card title="Informações de Pagamento">
+                <Form
+                  form={form}
+                  layout="vertical"
+                  onFinish={handlePayment}
+                >
+                  <Form.Item
+                    name="paymentMethod"
+                    label="Forma de Pagamento"
+                    rules={[{ required: true, message: 'Selecione uma forma de pagamento' }]}
+                  >
+                    <Radio.Group className="w-full">
+                      <Space direction="vertical" className="w-full">
+                        <Radio value="credit_card" className="w-full">
+                          <div className="flex items-center space-x-3">
+                            <CreditCardOutlined className="text-xl" />
+                            <div>
+                              <div className="font-medium">Cartão de Crédito</div>
+                              <div className="text-sm text-gray-500">Visa, Mastercard, Elo</div>
+                            </div>
+                          </div>
+                        </Radio>
+                        <Radio value="pix" className="w-full">
+                          <div className="flex items-center space-x-3">
+                            <QrcodeOutlined className="text-xl" />
+                            <div>
+                              <div className="font-medium">PIX</div>
+                              <div className="text-sm text-gray-500">Pagamento instantâneo</div>
+                            </div>
+                          </div>
+                        </Radio>
+                      </Space>
+                    </Radio.Group>
+                  </Form.Item>
+
+                  <Form.Item
+                    name="cardNumber"
+                    label="Número do Cartão"
+                    rules={[{ required: true, message: 'Digite o número do cartão' }]}
+                  >
+                    <Input 
+                      placeholder="1234 5678 9012 3456"
+                      prefix={<CreditCardOutlined />}
+                    />
+                  </Form.Item>
+
+                  <Row gutter={16}>
+                    <Col span={12}>
+                      <Form.Item
+                        name="expiryDate"
+                        label="Validade"
+                        rules={[{ required: true, message: 'Digite a validade' }]}
+                      >
+                        <Input placeholder="MM/AA" />
+                      </Form.Item>
+                    </Col>
+                    <Col span={12}>
+                      <Form.Item
+                        name="cvv"
+                        label="CVV"
+                        rules={[{ required: true, message: 'Digite o CVV' }]}
+                      >
+                        <Input placeholder="123" />
+                      </Form.Item>
+                    </Col>
+                  </Row>
+
+                  <Form.Item
+                    name="cardName"
+                    label="Nome no Cartão"
+                    rules={[{ required: true, message: 'Digite o nome no cartão' }]}
+                  >
+                    <Input placeholder="Nome como está no cartão" />
+                  </Form.Item>
+
+                  <div className="flex space-x-4">
+                    <Button onClick={() => setCurrentStep(0)}>
+                      Voltar
+                    </Button>
+                    <Button 
+                      type="primary" 
+                      htmlType="submit"
+                      loading={processing}
+                      icon={<LockOutlined />}
+                    >
+                      Finalizar Compra
+                    </Button>
+                  </div>
+                </Form>
+              </Card>
+            )}
+
+            {currentStep === 2 && (
+              <Card>
+                <div className="text-center py-8">
+                  <CheckCircleOutlined className="text-6xl text-green-500 mb-4" />
+                  <Title level={2}>Compra Realizada com Sucesso!</Title>
+                  <Paragraph className="text-lg text-gray-600 mb-6">
+                    Seus materiais educacionais já estão disponíveis para download.
+                  </Paragraph>
+                  <Space>
+                    <Button type="primary" onClick={() => router.push('/compras')}>
+                      Ver Minhas Compras
+                    </Button>
+                    <Button onClick={() => router.push('/produtos')}>
+                      Continuar Comprando
+                    </Button>
+                  </Space>
+                </div>
+              </Card>
+            )}
+          </Col>
+
+          {/* Order Summary */}
+          <Col xs={24} lg={8}>
+            <Card title="Resumo do Pedido" className="sticky top-4">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  {products.map((product) => (
+                    <div key={product.id} className="flex justify-between">
+                      <Text className="text-sm">{product.title}</Text>
+                      <Text className="text-sm">{formatPrice(product.price)}</Text>
+                    </div>
+                  ))}
+                </div>
+                
+                <Divider />
+                
+                <div className="flex justify-between">
+                  <Text>Subtotal:</Text>
+                  <Text strong>{formatPrice(calculateTotal())}</Text>
+                </div>
+                
+                <div className="flex justify-between">
+                  <Text>Taxa de processamento:</Text>
+                  <Text>Grátis</Text>
+                </div>
+                
+                <Divider />
+                
+                <div className="flex justify-between">
+                  <Title level={4}>Total:</Title>
+                  <Title level={4} className="text-blue-600">
+                    {formatPrice(calculateTotal())}
+                  </Title>
+                </div>
+              </div>
+            </Card>
+
+            {/* Security Info */}
+            <Card className="mt-4">
+              <div className="text-center space-y-2">
+                <LockOutlined className="text-2xl text-green-600" />
+                <Title level={5}>Pagamento Seguro</Title>
+                <Paragraph className="text-sm text-gray-600">
+                  Seus dados estão protegidos com criptografia SSL de 256 bits
+                </Paragraph>
+              </div>
+            </Card>
+          </Col>
+        </Row>
       </div>
     </AppLayout>
   )
