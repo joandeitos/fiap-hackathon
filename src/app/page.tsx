@@ -1,103 +1,255 @@
-import Image from "next/image";
+'use client'
 
-export default function Home() {
+import React from 'react'
+import { Row, Col, Card, Button, Typography, Space, Statistic, Avatar } from 'antd'
+import { 
+  ShopOutlined, 
+  UserOutlined, 
+  DollarOutlined, 
+  StarOutlined,
+  ArrowRightOutlined,
+  CheckCircleOutlined,
+  BookOutlined,
+  TeamOutlined
+} from '@ant-design/icons'
+import Link from 'next/link'
+import AppLayout from '@/components/Layout/AppLayout'
+
+const { Title, Paragraph } = Typography
+
+export default function HomePage() {
+  const features = [
+    {
+      icon: <BookOutlined className="text-4xl text-blue-600" />,
+      title: 'Materiais de Qualidade',
+      description: 'Recursos educacionais criados por professores experientes e validados pela comunidade.'
+    },
+    {
+      icon: <DollarOutlined className="text-4xl text-green-600" />,
+      title: 'Monetize seu Conhecimento',
+      description: 'Transforme sua experiência em renda vendendo seus materiais didáticos.'
+    },
+    {
+      icon: <TeamOutlined className="text-4xl text-purple-600" />,
+      title: 'Comunidade Ativa',
+      description: 'Conecte-se com outros educadores e compartilhe experiências.'
+    }
+  ]
+
+  const stats = [
+    { title: 'Professores Ativos', value: 1250, suffix: '+' },
+    { title: 'Materiais Disponíveis', value: 3400, suffix: '+' },
+    { title: 'Downloads Realizados', value: 15600, suffix: '+' },
+    { title: 'Avaliação Média', value: 4.8, suffix: '/5' }
+  ]
+
+  const testimonials = [
+    {
+      name: 'Maria Silva',
+      role: 'Professora de Matemática',
+      content: 'Encontrei materiais incríveis que transformaram minhas aulas. Recomendo!',
+      avatar: 'M'
+    },
+    {
+      name: 'João Santos',
+      role: 'Professor de História',
+      content: 'Consegui monetizar meu conhecimento vendendo meus planos de aula.',
+      avatar: 'J'
+    },
+    {
+      name: 'Ana Costa',
+      role: 'Professora de Português',
+      content: 'A qualidade dos materiais é excepcional. Vale cada centavo!',
+      avatar: 'A'
+    }
+  ]
+
   return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <AppLayout>
+      {/* Hero Section */}
+      <div className="hero-section">
+        <div className="max-w-6xl mx-auto px-4">
+          <Row justify="center" align="middle">
+            <Col xs={24} lg={16} className="text-center">
+              <Title level={1} className="text-white mb-6">
+                Transforme a Educação com Materiais de Qualidade
+              </Title>
+              <Paragraph className="text-xl text-white/90 mb-8">
+                Descubra, compre e venda recursos educacionais criados por professores para professores. 
+                Uma plataforma que conecta educadores e potencializa o aprendizado.
+              </Paragraph>
+              <Space size="large" wrap>
+                <Link href="/produtos">
+                  <Button type="primary" size="large" icon={<ShopOutlined />}>
+                    Explorar Materiais
+                  </Button>
+                </Link>
+                <Button size="large" ghost icon={<UserOutlined />}>
+                  Começar a Vender
+                </Button>
+              </Space>
+            </Col>
+          </Row>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+      </div>
+
+      {/* Stats Section */}
+      <div className="py-16 bg-white">
+        <div className="max-w-6xl mx-auto px-4">
+          <Row gutter={[32, 32]} justify="center">
+            {stats.map((stat, index) => (
+              <Col xs={12} sm={6} key={index}>
+                <Card className="text-center border-0 shadow-sm">
+                  <Statistic
+                    title={stat.title}
+                    value={stat.value}
+                    suffix={stat.suffix}
+                    valueStyle={{ color: '#1890ff', fontSize: '2rem', fontWeight: 'bold' }}
+                  />
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        </div>
+      </div>
+
+      {/* Features Section */}
+      <div className="py-16 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <Title level={2}>Por que escolher o EduMarketplace?</Title>
+            <Paragraph className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Nossa plataforma foi desenvolvida pensando nas necessidades reais dos educadores brasileiros.
+            </Paragraph>
+          </div>
+          
+          <Row gutter={[32, 32]}>
+            {features.map((feature, index) => (
+              <Col xs={24} md={8} key={index}>
+                <Card className="h-full text-center product-card">
+                  <div className="mb-4">{feature.icon}</div>
+                  <Title level={4}>{feature.title}</Title>
+                  <Paragraph className="text-gray-600">
+                    {feature.description}
+                  </Paragraph>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        </div>
+      </div>
+
+      {/* How it Works */}
+      <div className="py-16 bg-white">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <Title level={2}>Como Funciona</Title>
+            <Paragraph className="text-lg text-gray-600">
+              Processo simples e seguro para professores e compradores
+            </Paragraph>
+          </div>
+
+          <Row gutter={[32, 32]} align="middle">
+            <Col xs={24} lg={12}>
+              <div className="space-y-6">
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">
+                    1
+                  </div>
+                  <div>
+                    <Title level={4} className="mb-2">Cadastre-se Gratuitamente</Title>
+                    <Paragraph className="text-gray-600">
+                      Crie sua conta em menos de 2 minutos e acesse nossa plataforma.
+                    </Paragraph>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold">
+                    2
+                  </div>
+                  <div>
+                    <Title level={4} className="mb-2">Explore ou Publique</Title>
+                    <Paragraph className="text-gray-600">
+                      Navegue por milhares de materiais ou publique seus próprios recursos.
+                    </Paragraph>
+                  </div>
+                </div>
+
+                <div className="flex items-start space-x-4">
+                  <div className="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold">
+                    3
+                  </div>
+                  <div>
+                    <Title level={4} className="mb-2">Compre com Segurança</Title>
+                    <Paragraph className="text-gray-600">
+                      Pagamento protegido e download imediato após a compra.
+                    </Paragraph>
+                  </div>
+                </div>
+              </div>
+            </Col>
+
+            <Col xs={24} lg={12}>
+              <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-0">
+                <div className="text-center p-8">
+                  <CheckCircleOutlined className="text-6xl text-green-600 mb-4" />
+                  <Title level={3}>Pronto para Começar?</Title>
+                  <Paragraph className="text-gray-600 mb-6">
+                    Junte-se a milhares de educadores que já transformaram suas aulas.
+                  </Paragraph>
+                  <Link href="/produtos">
+                    <Button type="primary" size="large" icon={<ArrowRightOutlined />}>
+                      Explorar Agora
+                    </Button>
+                  </Link>
+                </div>
+              </Card>
+            </Col>
+          </Row>
+        </div>
+      </div>
+
+      {/* Testimonials */}
+      <div className="py-16 bg-gray-50">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="text-center mb-12">
+            <Title level={2}>O que dizem nossos usuários</Title>
+            <Paragraph className="text-lg text-gray-600">
+              Depoimentos reais de professores que usam nossa plataforma
+            </Paragraph>
+          </div>
+
+          <Row gutter={[32, 32]}>
+            {testimonials.map((testimonial, index) => (
+              <Col xs={24} md={8} key={index}>
+                <Card className="h-full">
+                  <div className="flex items-center mb-4">
+                    <Avatar size={48} className="bg-blue-600 mr-3">
+                      {testimonial.avatar}
+                    </Avatar>
+                    <div>
+                      <Title level={5} className="mb-0">{testimonial.name}</Title>
+                      <Paragraph className="text-gray-500 mb-0 text-sm">
+                        {testimonial.role}
+                      </Paragraph>
+                    </div>
+                  </div>
+                  <Paragraph className="text-gray-600 italic">
+                    "{testimonial.content}"
+                  </Paragraph>
+                  <div className="flex text-yellow-400">
+                    {[...Array(5)].map((_, i) => (
+                      <StarOutlined key={i} />
+                    ))}
+                  </div>
+                </Card>
+              </Col>
+            ))}
+          </Row>
+        </div>
+      </div>
+    </AppLayout>
+  )
 }
+
