@@ -71,7 +71,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
       <Header className="flex items-center justify-between px-4 lg:px-8 bg-white shadow-sm border-b border-gray-100">
         {/* Logo */}
         <div className="flex items-center">
-          <Link href="/" className="flex items-center space-x-3">
+          <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
             <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
               <span className="text-white font-bold text-lg">E</span>
             </div>
@@ -108,23 +108,25 @@ export default function AppLayout({ children }: AppLayoutProps) {
               </Dropdown>
             ) : (
               <div className="flex items-center space-x-3">
-                <Button 
-                  type="text" 
-                  icon={<LoginOutlined />}
-                  onClick={() => setIsLoggedIn(true)}
-                  className="font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
-                  size="large"
-                >
-                  Entrar
-                </Button>
-                <Button 
-                  type="primary"
-                  onClick={() => setIsLoggedIn(true)}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 border-none font-medium shadow-lg hover:shadow-xl transition-all"
-                  size="large"
-                >
-                  Cadastrar
-                </Button>
+                <Link href="/sign-in">
+                  <Button 
+                    type="text" 
+                    icon={<LoginOutlined />}
+                    className="font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+                    size="large"
+                  >
+                    Entrar
+                  </Button>
+                </Link>
+                <Link href="/sign-up">
+                  <Button 
+                    type="primary"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 border-none font-medium shadow-lg hover:shadow-xl transition-all"
+                    size="large"
+                  >
+                    Cadastrar
+                  </Button>
+                </Link>
               </div>
             )}
           </div>
@@ -132,9 +134,9 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
         {/* Mobile Menu Button */}
         <Button
-          className="md:hidden"
-          type="text"
-          icon={<MenuOutlined />}
+          className="md:hidden bg-gradient-to-r from-blue-600 to-purple-600 border-none hover:from-blue-700 hover:to-purple-700"
+          type="primary"
+          icon={<MenuOutlined className="text-white" />}
           onClick={() => setMobileMenuVisible(true)}
         />
 
@@ -168,27 +170,26 @@ export default function AppLayout({ children }: AppLayoutProps) {
               </div>
             ) : (
               <div className="space-y-3">
-                <Button 
-                  type="default" 
-                  icon={<LoginOutlined />}
-                  block
-                  onClick={() => {
-                    setIsLoggedIn(true)
-                    setMobileMenuVisible(false)
-                  }}
-                >
-                  Entrar
-                </Button>
-                <Button 
-                  type="primary"
-                  block
-                  onClick={() => {
-                    setIsLoggedIn(true)
-                    setMobileMenuVisible(false)
-                  }}
-                >
-                  Cadastrar
-                </Button>
+                <Link href="/sign-in">
+                  <Button 
+                    type="default" 
+                    icon={<LoginOutlined />}
+                    block
+                    onClick={() => setMobileMenuVisible(false)}
+                  >
+                    Entrar
+                  </Button>
+                </Link>
+                <Link href="/sign-up">
+                  <Button 
+                    type="primary"
+                    block
+                    onClick={() => setMobileMenuVisible(false)}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 border-none"
+                  >
+                    Cadastrar
+                  </Button>
+                </Link>
               </div>
             )}
           </div>
