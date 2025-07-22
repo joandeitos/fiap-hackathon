@@ -9,7 +9,6 @@ import {
   Tag, 
   Rate, 
   Typography, 
-  Space,
   Avatar,
   Divider,
   List,
@@ -17,20 +16,17 @@ import {
   message,
   Modal,
   Form,
-  Input,
-  Statistic
+  Input
 } from 'antd'
 import { 
   DownloadOutlined,
   StarOutlined,
   UserOutlined,
   BookOutlined,
-  DollarOutlined,
   ShoppingCartOutlined,
   HeartOutlined,
   ShareAltOutlined,
-  CalendarOutlined,
-  EyeOutlined
+  CalendarOutlined
 } from '@ant-design/icons'
 import { useParams } from 'next/navigation'
 import AppLayout from '@/components/Layout/AppLayout'

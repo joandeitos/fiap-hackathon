@@ -236,7 +236,7 @@ export default function HomePage() {
                     </div>
                   </div>
                   <Paragraph className="text-gray-600 italic">
-                    "{testimonial.content}"
+                    &quot;{testimonial.content}&quot;
                   </Paragraph>
                   <div className="flex text-yellow-400">
                     {[...Array(5)].map((_, i) => (

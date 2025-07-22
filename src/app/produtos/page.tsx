@@ -11,14 +11,11 @@ import {
   Tag, 
   Rate, 
   Typography, 
-  Space,
   Pagination,
   Drawer,
   Slider,
   Checkbox,
-  Badge,
   Avatar,
-  Divider,
   Spin,
   message
 } from 'antd'
@@ -28,10 +25,8 @@ import {
   AppstoreOutlined,
   BarsOutlined,
   DownloadOutlined,
-  StarOutlined,
   UserOutlined,
-  BookOutlined,
-  DollarOutlined
+  BookOutlined
 } from '@ant-design/icons'
 import Link from 'next/link'
 import AppLayout from '@/components/Layout/AppLayout'

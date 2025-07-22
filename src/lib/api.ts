@@ -148,7 +148,7 @@ export interface PaginatedResponse<T> {
 // API Functions
 
 // Health Check
-export const healthCheck = async (): Promise<ApiResponse<any>> => {
+export const healthCheck = async (): Promise<ApiResponse<{ status: string; message: string; version: string }>> => {
   const response = await api.get('/health')
   return response.data
 }
@@ -183,7 +183,7 @@ export const updateProduct = async (id: number, productData: Partial<Product>): 
   return response.data
 }
 
-export const deleteProduct = async (id: number): Promise<ApiResponse<any>> => {
+export const deleteProduct = async (id: number): Promise<ApiResponse<{ message: string }>> => {
   const response = await api.delete(`/products/${id}`)
   return response.data
 }
@@ -250,7 +250,11 @@ export const getSalesStats = async (params?: {
   seller_id?: number
   buyer_id?: number
   days?: number
-}): Promise<ApiResponse<any>> => {
+}): Promise<ApiResponse<{
+  period: { start_date: string; end_date: string; days: number }
+  totals: { total_sales: number; completed_sales: number; pending_sales: number; cancelled_sales: number; total_revenue: number; average_sale_value: number }
+  daily_breakdown: Array<{ date: string; sales: number; revenue: number }>
+}>> => {
   const response = await api.get('/sales/stats', { params })
   return response.data
 }

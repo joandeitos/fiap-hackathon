@@ -27,13 +27,12 @@ import {
   ShopOutlined,
   DownloadOutlined,
   StarOutlined,
-  TrendingUpOutlined,
+  RiseOutlined,
   EyeOutlined,
   EditOutlined,
   DeleteOutlined,
   PlusOutlined,
   UserOutlined,
-  CalendarOutlined,
   BarChartOutlined,
   BookOutlined
 } from '@ant-design/icons'
@@ -61,7 +60,11 @@ export default function DashboardPage() {
   })
   const [recentSales, setRecentSales] = useState<Sale[]>([])
   const [myProducts, setMyProducts] = useState<Product[]>([])
-  const [salesStats, setSalesStats] = useState<any>(null)
+  const [salesStats, setSalesStats] = useState<{
+    period: { start_date: string; end_date: string; days: number }
+    totals: { total_sales: number; completed_sales: number; pending_sales: number; cancelled_sales: number; total_revenue: number; average_sale_value: number }
+    daily_breakdown: Array<{ date: string; sales: number; revenue: number }>
+  } | null>(null)
 
   // Simulated current user ID (in real app, get from auth context)
   const currentUserId = 1
@@ -389,7 +392,7 @@ export default function DashboardPage() {
               value={stats.monthlyGrowth}
               precision={1}
               valueStyle={{ color: '#3f8600' }}
-              prefix={<TrendingUpOutlined />}
+              prefix={<RiseOutlined />}
               suffix="%"
             />
             <Progress 
