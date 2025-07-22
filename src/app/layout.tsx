@@ -1,14 +1,14 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
-import { AntdRegistry } from '@ant-design/nextjs-registry'
-import { ConfigProvider } from 'antd'
 import './globals.css'
+import { AntdRegistry } from '@ant-design/nextjs-registry'
+import { ClerkProvider } from '@clerk/nextjs'
 
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: 'EduMarketplace - Marketplace Educacional',
-  description: 'Plataforma para professores venderem e comprarem materiais educacionais de qualidade',
+  title: 'EduMarketplace - Transformando Educação',
+  description: 'Plataforma que conecta professores para compartilhar, vender e comprar materiais educacionais de qualidade.',
 }
 
 export default function RootLayout({
@@ -17,26 +17,15 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="pt-BR">
-      <body className={inter.className}>
-        <AntdRegistry>
-          <ConfigProvider
-            theme={{
-              token: {
-                colorPrimary: '#1890ff',
-                colorSuccess: '#52c41a',
-                colorWarning: '#faad14',
-                colorError: '#ff4d4f',
-                borderRadius: 8,
-                fontFamily: inter.style.fontFamily,
-              },
-            }}
-          >
+    <ClerkProvider>
+      <html lang="pt-BR">
+        <body className={inter.className}>
+          <AntdRegistry>
             {children}
-          </ConfigProvider>
-        </AntdRegistry>
-      </body>
-    </html>
+          </AntdRegistry>
+        </body>
+      </html>
+    </ClerkProvider>
   )
 }
 

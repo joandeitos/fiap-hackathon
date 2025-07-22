@@ -14,6 +14,7 @@ import {
 } from '@ant-design/icons'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useUser, SignOutButton } from '@clerk/nextjs'
 
 const { Header, Content, Footer } = Layout
 
@@ -23,7 +24,7 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children }: AppLayoutProps) {
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false)
-  const [isLoggedIn, setIsLoggedIn] = useState(false) // Simular estado de login
+  const { isSignedIn, user } = useUser()
   const pathname = usePathname()
 
   const menuItems = [
@@ -61,8 +62,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
     {
       key: 'logout',
       icon: <LogoutOutlined />,
-      label: 'Sair',
-      onClick: () => setIsLoggedIn(false),
+      label: (
+        <SignOutButton>
+          Sair
+        </SignOutButton>
+      ),
     },
   ]
 
@@ -73,7 +77,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
         <div className="flex items-center">
           <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
             <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-lg">EduMarketplace</span>
+              <span className="text-white font-bold text-lg">E</span>
             </div>
             <div className="hidden sm:block">
               <span className="text-xl font-bold text-gray-800">
@@ -99,11 +103,17 @@ export default function AppLayout({ children }: AppLayoutProps) {
           
           {/* User Actions */}
           <div className="flex items-center space-x-3">
-            {isLoggedIn ? (
+            {isSignedIn ? (
               <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
                 <Space className="cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors">
-                  <Avatar icon={<UserOutlined />} className="bg-blue-600" />
-                  <span className="text-gray-700 font-medium">João Silva</span>
+                  <Avatar 
+                    src={user?.imageUrl} 
+                    icon={<UserOutlined />} 
+                    className="bg-blue-600" 
+                  />
+                  <span className="text-gray-700 font-medium">
+                    {user?.firstName || 'Usuário'}
+                  </span>
                 </Space>
               </Dropdown>
             ) : (
@@ -112,7 +122,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                   <Button 
                     type="text" 
                     icon={<LoginOutlined />}
-                    className="font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 py-2"
+                    className="font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
                     size="large"
                   >
                     Entrar
@@ -121,7 +131,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 <Link href="/sign-up">
                   <Button 
                     type="primary"
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 border-none font-medium shadow-lg hover:shadow-xl transition-all py-2"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 border-none font-medium shadow-lg hover:shadow-xl transition-all"
                     size="large"
                   >
                     Cadastrar
@@ -156,11 +166,17 @@ export default function AppLayout({ children }: AppLayoutProps) {
           />
           
           <div className="mt-8 pt-8 border-t border-gray-200">
-            {isLoggedIn ? (
+            {isSignedIn ? (
               <div className="space-y-4">
                 <div className="flex items-center space-x-3">
-                  <Avatar icon={<UserOutlined />} />
-                  <span className="text-gray-700">João Silva</span>
+                  <Avatar 
+                    src={user?.imageUrl} 
+                    icon={<UserOutlined />} 
+                    className="bg-blue-600" 
+                  />
+                  <span className="text-gray-700">
+                    {user?.firstName || 'Usuário'}
+                  </span>
                 </div>
                 <Menu
                   mode="vertical"
