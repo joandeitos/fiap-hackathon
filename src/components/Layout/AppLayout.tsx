@@ -68,16 +68,19 @@ export default function AppLayout({ children }: AppLayoutProps) {
 
   return (
     <Layout>
-      <Header className="flex items-center justify-between">
+      <Header className="flex items-center justify-between px-4 lg:px-8 bg-white shadow-sm border-b border-gray-100">
         {/* Logo */}
         <div className="flex items-center">
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-sm">E</span>
+          <Link href="/" className="flex items-center space-x-3">
+            <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+              <span className="text-white font-bold text-lg">E</span>
             </div>
-            <span className="text-xl font-bold text-gray-800 hidden sm:block">
-              EduMarketplace
-            </span>
+            <div className="hidden sm:block">
+              <span className="text-xl font-bold text-gray-800">
+                EduMarketplace
+              </span>
+              <p className="text-xs text-gray-500 -mt-1">Transformando Educação</p>
+            </div>
           </Link>
         </div>
 
@@ -87,30 +90,38 @@ export default function AppLayout({ children }: AppLayoutProps) {
             mode="horizontal"
             selectedKeys={[pathname]}
             items={menuItems}
-            className="border-none bg-transparent"
+            className="border-none bg-transparent text-gray-700"
+            style={{ 
+              fontSize: '16px',
+              fontWeight: '500'
+            }}
           />
           
           {/* User Actions */}
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             {isLoggedIn ? (
               <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-                <Space className="cursor-pointer">
-                  <Avatar icon={<UserOutlined />} />
-                  <span className="text-gray-700">João Silva</span>
+                <Space className="cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-colors">
+                  <Avatar icon={<UserOutlined />} className="bg-blue-600" />
+                  <span className="text-gray-700 font-medium">João Silva</span>
                 </Space>
               </Dropdown>
             ) : (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-3">
                 <Button 
-                  type="default" 
+                  type="text" 
                   icon={<LoginOutlined />}
                   onClick={() => setIsLoggedIn(true)}
+                  className="font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+                  size="large"
                 >
                   Entrar
                 </Button>
                 <Button 
                   type="primary"
                   onClick={() => setIsLoggedIn(true)}
+                  className="bg-gradient-to-r from-blue-600 to-purple-600 border-none font-medium shadow-lg hover:shadow-xl transition-all"
+                  size="large"
                 >
                   Cadastrar
                 </Button>

@@ -151,38 +151,38 @@ export default function HomePage() {
 
           <Row gutter={[32, 32]} align="middle">
             <Col xs={24} lg={12}>
-              <div className="space-y-6">
-                <div className="flex items-start space-x-4">
-                  <div className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold">
+              <div className="space-y-8">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg">
                     1
                   </div>
                   <div>
-                    <Title level={4} className="mb-2">Cadastre-se Gratuitamente</Title>
-                    <Paragraph className="text-gray-600">
+                    <Title level={4} className="mb-2 text-center">Cadastre-se Gratuitamente</Title>
+                    <Paragraph className="text-gray-600 text-center max-w-sm mx-auto">
                       Crie sua conta em menos de 2 minutos e acesse nossa plataforma.
                     </Paragraph>
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-4">
-                  <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="w-12 h-12 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg">
                     2
                   </div>
                   <div>
-                    <Title level={4} className="mb-2">Explore ou Publique</Title>
-                    <Paragraph className="text-gray-600">
+                    <Title level={4} className="mb-2 text-center">Explore ou Publique</Title>
+                    <Paragraph className="text-gray-600 text-center max-w-sm mx-auto">
                       Navegue por milhares de materiais ou publique seus próprios recursos.
                     </Paragraph>
                   </div>
                 </div>
 
-                <div className="flex items-start space-x-4">
-                  <div className="w-8 h-8 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold">
+                <div className="flex flex-col items-center text-center space-y-4">
+                  <div className="w-12 h-12 bg-purple-600 text-white rounded-full flex items-center justify-center font-bold text-lg shadow-lg">
                     3
                   </div>
                   <div>
-                    <Title level={4} className="mb-2">Compre com Segurança</Title>
-                    <Paragraph className="text-gray-600">
+                    <Title level={4} className="mb-2 text-center">Compre com Segurança</Title>
+                    <Paragraph className="text-gray-600 text-center max-w-sm mx-auto">
                       Pagamento protegido e download imediato após a compra.
                     </Paragraph>
                   </div>
