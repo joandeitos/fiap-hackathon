@@ -32,7 +32,6 @@ import AppLayout from '@/components/Layout/AppLayout'
 
 const { Title } = Typography
 const { Option } = Select
-const { CheckboxGroup } = Checkbox
 
 interface SearchFilters {
   query: string
@@ -382,7 +381,7 @@ export default function SearchPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Nível de Ensino:
                     </label>
-                    <CheckboxGroup
+                    <Checkbox.Group
                       options={levels}
                       value={filters.level}
                       onChange={(value) => setFilters(prev => ({ ...prev, level: value as string[] }))}

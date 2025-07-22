@@ -27,7 +27,7 @@ import {
 } from '@ant-design/icons'
 import { useParams, useRouter } from 'next/navigation'
 import AppLayout from '@/components/Layout/AppLayout'
-import { useUser } from '@clerk/nextjs'
+// import { useUser } from '@clerk/nextjs'
 
 const { Title, Paragraph } = Typography
 const { Step } = Steps
@@ -47,7 +47,13 @@ interface Product {
 export default function CheckoutPage() {
   const params = useParams()
   const router = useRouter()
-  const { user, isSignedIn } = useUser()
+  // const { user, isSignedIn } = useUser()
+  const user = {
+    firstName: 'Maria',
+    lastName: 'Silva',
+    emailAddresses: [{ emailAddress: 'maria.silva@email.com' }]
+  }
+  const isSignedIn = true
   const [product, setProduct] = useState<Product | null>(null)
   const [loading, setLoading] = useState(true)
   const [currentStep, setCurrentStep] = useState(0)

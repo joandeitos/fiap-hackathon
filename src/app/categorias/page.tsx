@@ -8,7 +8,7 @@ import {
   ExperimentOutlined,
   GlobalOutlined,
   PictureOutlined,
-  MusicNoteOutlined,
+  SoundOutlined,
   TrophyOutlined,
   HeartOutlined
 } from '@ant-design/icons'
@@ -38,7 +38,7 @@ export default function CategoriasPage() {
     'História': <GlobalOutlined className="text-orange-600 text-4xl" />,
     'Geografia': <GlobalOutlined className="text-teal-600 text-4xl" />,
     'Arte': <PictureOutlined className="text-pink-600 text-4xl" />,
-    'Música': <MusicNoteOutlined className="text-indigo-600 text-4xl" />,
+    'Música': <SoundOutlined className="text-indigo-600 text-4xl" />,
     'Educação Física': <TrophyOutlined className="text-red-600 text-4xl" />,
     'Filosofia': <HeartOutlined className="text-gray-600 text-4xl" />
   }

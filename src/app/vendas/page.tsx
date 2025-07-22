@@ -19,7 +19,7 @@ import {
 import { 
   DollarOutlined,
   ShoppingOutlined,
-  TrendingUpOutlined,
+  RiseOutlined,
   DownloadOutlined,
   EyeOutlined,
   FilterOutlined
@@ -281,7 +281,7 @@ export default function VendasPage() {
                   value={averageTicket}
                   precision={2}
                   prefix="R$"
-                  prefix={<TrendingUpOutlined />}
+                  prefix={<RiseOutlined />}
                   valueStyle={{ color: '#722ed1' }}
                 />
               </Card>

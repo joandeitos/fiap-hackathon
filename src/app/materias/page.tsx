@@ -8,7 +8,7 @@ import {
   ExperimentOutlined,
   GlobalOutlined,
   PictureOutlined,
-  MusicNoteOutlined,
+  SoundOutlined,
   TrophyOutlined,
   HeartOutlined,
   BulbOutlined
@@ -48,7 +48,7 @@ export default function MateriasPage() {
     'Geografia Humana': <GlobalOutlined className="text-teal-500 text-3xl" />,
     'Artes Visuais': <PictureOutlined className="text-pink-600 text-3xl" />,
     'Teatro': <PictureOutlined className="text-pink-500 text-3xl" />,
-    'Educação Musical': <MusicNoteOutlined className="text-indigo-600 text-3xl" />,
+    'Educação Musical': <SoundOutlined className="text-indigo-600 text-3xl" />,
     'Esportes': <TrophyOutlined className="text-red-600 text-3xl" />,
     'Ética': <HeartOutlined className="text-gray-600 text-3xl" />
   }

@@ -1,7 +1,9 @@
 'use client'
 
-import { SignIn } from '@clerk/nextjs'
-import { Card, Typography } from 'antd'
+// import { SignIn } from '@clerk/nextjs'
+import { Card, Typography, Button, Form, Input } from 'antd'
+import { UserOutlined, LockOutlined } from '@ant-design/icons'
+import Link from 'next/link'
 
 const { Title, Paragraph } = Typography
 
@@ -21,40 +23,63 @@ export default function SignInPage() {
           </Paragraph>
         </div>
 
-        <Card className="shadow-xl border-0 rounded-2xl overflow-hidden">
-          <div className="p-6">
-            <SignIn 
-              appearance={{
-                elements: {
-                  formButtonPrimary: 
-                    'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-sm normal-case',
-                  card: 'shadow-none',
-                  headerTitle: 'hidden',
-                  headerSubtitle: 'hidden',
-                  socialButtonsBlockButton: 
-                    'border-gray-200 hover:bg-gray-50 text-gray-700',
-                  formFieldInput: 
-                    'border-gray-200 focus:border-blue-500 focus:ring-blue-500',
-                  footerActionLink: 
-                    'text-blue-600 hover:text-blue-700'
-                }
-              }}
-            />
+        <Card className="shadow-xl border-0">
+          <Form
+            name="signin"
+            layout="vertical"
+            onFinish={(values) => {
+              console.log('Login:', values)
+              // Aqui seria a integração com autenticação
+            }}
+          >
+            <Form.Item
+              name="email"
+              label="Email"
+              rules={[
+                { required: true, message: 'Por favor, insira seu email!' },
+                { type: 'email', message: 'Email inválido!' }
+              ]}
+            >
+              <Input 
+                prefix={<UserOutlined />} 
+                placeholder="seu@email.com"
+                size="large"
+              />
+            </Form.Item>
+
+            <Form.Item
+              name="password"
+              label="Senha"
+              rules={[{ required: true, message: 'Por favor, insira sua senha!' }]}
+            >
+              <Input.Password 
+                prefix={<LockOutlined />} 
+                placeholder="Sua senha"
+                size="large"
+              />
+            </Form.Item>
+
+            <Form.Item>
+              <Button 
+                type="primary" 
+                htmlType="submit" 
+                size="large"
+                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 border-0 hover:from-blue-700 hover:to-purple-700"
+              >
+                Entrar
+              </Button>
+            </Form.Item>
+          </Form>
+
+          <div className="text-center">
+            <Paragraph className="text-gray-600">
+              Não tem uma conta?{' '}
+              <Link href="/sign-up" className="text-blue-600 hover:text-blue-700 font-medium">
+                Cadastre-se aqui
+              </Link>
+            </Paragraph>
           </div>
         </Card>
-
-        <div className="text-center mt-6">
-          <Paragraph className="text-sm text-gray-500">
-            Ao entrar, você concorda com nossos{' '}
-            <a href="/terms" className="text-blue-600 hover:text-blue-700">
-              Termos de Uso
-            </a>{' '}
-            e{' '}
-            <a href="/privacy" className="text-blue-600 hover:text-blue-700">
-              Política de Privacidade
-            </a>
-          </Paragraph>
-        </div>
       </div>
     </div>
   )

@@ -14,7 +14,7 @@ import {
 } from '@ant-design/icons'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useUser, SignOutButton } from '@clerk/nextjs'
+// import { useUser, SignOutButton } from '@clerk/nextjs'
 
 const { Header, Content, Footer } = Layout
 
@@ -24,7 +24,9 @@ interface AppLayoutProps {
 
 export default function AppLayout({ children }: AppLayoutProps) {
   const [mobileMenuVisible, setMobileMenuVisible] = useState(false)
-  const { isSignedIn, user } = useUser()
+  // const { isSignedIn, user } = useUser()
+  const isSignedIn = false
+  const user = null
   const pathname = usePathname()
 
   const menuItems = [
@@ -63,9 +65,9 @@ export default function AppLayout({ children }: AppLayoutProps) {
       key: 'logout',
       icon: <LogoutOutlined />,
       label: (
-        <SignOutButton>
+        <span onClick={() => console.log('Logout')}>
           Sair
-        </SignOutButton>
+        </span>
       ),
     },
   ]
