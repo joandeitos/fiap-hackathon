@@ -73,7 +73,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
         <div className="flex items-center">
           <Link href="/" className="flex items-center space-x-3 hover:opacity-80 transition-opacity">
             <div className="w-10 h-10 bg-gradient-to-r from-blue-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-white font-bold text-lg">E</span>
+              <span className="text-white font-bold text-lg">EduMarketplace</span>
             </div>
             <div className="hidden sm:block">
               <span className="text-xl font-bold text-gray-800">
@@ -112,7 +112,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                   <Button 
                     type="text" 
                     icon={<LoginOutlined />}
-                    className="font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+                    className="font-medium text-gray-700 hover:text-blue-600 hover:bg-blue-50 py-2"
                     size="large"
                   >
                     Entrar
@@ -121,7 +121,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 <Link href="/sign-up">
                   <Button 
                     type="primary"
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 border-none font-medium shadow-lg hover:shadow-xl transition-all"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 border-none font-medium shadow-lg hover:shadow-xl transition-all py-2"
                     size="large"
                   >
                     Cadastrar
