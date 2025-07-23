@@ -294,9 +294,28 @@ export default function DashboardPage() {
       key: 'actions',
       render: (record: Product) => (
         <Space>
-          <Button size="small" icon={<EyeOutlined />} />
-          <Button size="small" icon={<EditOutlined />} />
-          <Button size="small" icon={<DeleteOutlined />} danger />
+          <Button 
+            size="small" 
+            icon={<EyeOutlined />}
+            onClick={() => {
+              window.open(`/produtos/${record.id}`, '_blank')
+            }}
+          />
+          <Button 
+            size="small" 
+            icon={<EditOutlined />}
+            onClick={() => {
+              message.info('Funcionalidade de edição em desenvolvimento')
+            }}
+          />
+          <Button 
+            size="small" 
+            icon={<DeleteOutlined />} 
+            danger
+            onClick={() => {
+              message.info('Funcionalidade de exclusão em desenvolvimento')
+            }}
+          />
         </Space>
       )
     }
@@ -395,7 +414,13 @@ export default function DashboardPage() {
                 <Card 
                   title="Vendas Recentes" 
                   extra={
-                    <Button type="link" icon={<BarChartOutlined />}>
+                    <Button 
+                      type="link" 
+                      icon={<BarChartOutlined />}
+                      onClick={() => {
+                        message.info('Relatório completo em desenvolvimento')
+                      }}
+                    >
                       Ver Relatório Completo
                     </Button>
                   }
@@ -456,7 +481,13 @@ export default function DashboardPage() {
             <Card 
               title="Meus Produtos" 
               extra={
-                <Button type="primary" icon={<PlusOutlined />}>
+                <Button 
+                  type="primary" 
+                  icon={<PlusOutlined />}
+                  onClick={() => {
+                    message.info('Funcionalidade de adicionar produto em desenvolvimento')
+                  }}
+                >
                   Novo Produto
                 </Button>
               }

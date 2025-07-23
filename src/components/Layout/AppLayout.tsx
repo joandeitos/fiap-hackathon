@@ -49,12 +49,12 @@ export default function AppLayout({ children }: AppLayoutProps) {
     {
       key: 'profile',
       icon: <UserOutlined />,
-      label: 'Meu Perfil',
+      label: <Link href="/profile">Meu Perfil</Link>,
     },
     {
       key: 'settings',
       icon: <SettingOutlined />,
-      label: 'Configurações',
+      label: <Link href="/profile">Configurações</Link>,
     },
     {
       type: 'divider' as const,

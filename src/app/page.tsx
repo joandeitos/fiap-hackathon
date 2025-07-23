@@ -84,9 +84,11 @@ export default function HomePage() {
                     Explorar Materiais
                   </Button>
                 </Link>
-                <Button size="large" ghost icon={<UserOutlined />}>
-                  Começar a Vender
-                </Button>
+                <Link href="/sign-up">
+                  <Button size="large" ghost icon={<UserOutlined />}>
+                    Começar a Vender
+                  </Button>
+                </Link>
               </Space>
             </Col>
           </Row>

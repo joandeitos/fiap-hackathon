@@ -283,7 +283,14 @@ export default function ProfilePage() {
                   renderItem={(item) => (
                     <List.Item
                       actions={[
-                        <Button key="download" type="link" icon={<DownloadOutlined />}>
+                        <Button 
+                          key="download" 
+                          type="link" 
+                          icon={<DownloadOutlined />}
+                          onClick={() => {
+                            message.success('Download iniciado!')
+                          }}
+                        >
                           Download
                         </Button>,
                         <Link key="view" href={`/produtos/${item.id}`}>
