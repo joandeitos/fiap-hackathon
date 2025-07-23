@@ -39,6 +39,11 @@ export default function AppLayout({ children }: AppLayoutProps) {
       label: <Link href="/produtos">Produtos</Link>,
     },
     {
+      key: '/upload',
+      icon: <UserOutlined />,
+      label: <Link href="/upload">Publicar</Link>,
+    },
+    {
       key: '/dashboard',
       icon: <DashboardOutlined />,
       label: <Link href="/dashboard">Dashboard</Link>,

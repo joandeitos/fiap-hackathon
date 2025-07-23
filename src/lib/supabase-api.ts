@@ -528,3 +528,89 @@ export const updateCartItemQuantity = async (userId: string, productId: string, 
   }
 }
 
+
+// Create new product
+export const createProduct = async (productData: {
+  title: string
+  description: string
+  category: string
+  subject: string
+  grade_level: string[]
+  price: number
+  tags: string[]
+  file_url: string
+  preview_images: string[]
+  author_id: string
+  status: string
+}): Promise<ApiResponse<Product>> => {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .insert([{
+        ...productData,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }])
+      .select(`
+        *,
+        author:users(id, name, email, average_rating, is_verified)
+      `)
+      .single()
+
+    if (error) {
+      return { success: false, error: error.message }
+    }
+
+    return { success: true, data }
+  } catch (error) {
+    console.error('Error creating product:', error)
+    return { success: false, error: 'Erro interno do servidor' }
+  }
+}
+
+// Update product
+export const updateProduct = async (productId: string, productData: Partial<Product>): Promise<ApiResponse<Product>> => {
+  try {
+    const { data, error } = await supabase
+      .from('products')
+      .update({
+        ...productData,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', productId)
+      .select(`
+        *,
+        author:users(id, name, email, average_rating, is_verified)
+      `)
+      .single()
+
+    if (error) {
+      return { success: false, error: error.message }
+    }
+
+    return { success: true, data }
+  } catch (error) {
+    console.error('Error updating product:', error)
+    return { success: false, error: 'Erro interno do servidor' }
+  }
+}
+
+// Delete product
+export const deleteProduct = async (productId: string): Promise<ApiResponse<boolean>> => {
+  try {
+    const { error } = await supabase
+      .from('products')
+      .delete()
+      .eq('id', productId)
+
+    if (error) {
+      return { success: false, error: error.message }
+    }
+
+    return { success: true, data: true }
+  } catch (error) {
+    console.error('Error deleting product:', error)
+    return { success: false, error: 'Erro interno do servidor' }
+  }
+}
+

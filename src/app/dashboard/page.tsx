@@ -36,6 +36,7 @@ import {
   BarChartOutlined,
   BookOutlined
 } from '@ant-design/icons'
+import Link from 'next/link'
 import AppLayout from '@/components/Layout/AppLayout'
 import { getUserSales, getProducts, Product } from '@/lib/api'
 
@@ -481,15 +482,14 @@ export default function DashboardPage() {
             <Card 
               title="Meus Produtos" 
               extra={
-                <Button 
-                  type="primary" 
-                  icon={<PlusOutlined />}
-                  onClick={() => {
-                    message.info('Funcionalidade de adicionar produto em desenvolvimento')
-                  }}
-                >
-                  Novo Produto
-                </Button>
+                <Link href="/upload">
+                  <Button 
+                    type="primary" 
+                    icon={<PlusOutlined />}
+                  >
+                    Novo Produto
+                  </Button>
+                </Link>
               }
             >
               <Table
