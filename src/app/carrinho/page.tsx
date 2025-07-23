@@ -15,31 +15,44 @@ import {
   Row,
   Col,
   InputNumber,
-  Popconfirm
+  Popconfirm,
+  Tag
 } from 'antd'
 import { 
   ShoppingCartOutlined,
   DeleteOutlined,
   CreditCardOutlined,
   BookOutlined,
-  UserOutlined
+  UserOutlined,
+  ClearOutlined
 } from '@ant-design/icons'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import AppLayout from '@/components/Layout/AppLayout'
-import { getCartItems, removeFromCart, clearCart, CartItem } from '@/lib/supabase-api'
+import { getCartItems, removeFromCart, clearCart, updateCartItemQuantity } from '@/lib/supabase-api'
+import { Product } from '@/lib/api'
 
 const { Title, Paragraph, Text } = Typography
+
+interface CartItem {
+  id: string
+  user_id: string
+  product_id: string
+  quantity: number
+  created_at: string
+  product?: Product
+}
 
 export default function CartPage() {
   const [cartItems, setCartItems] = useState<CartItem[]>([])
   const [loading, setLoading] = useState(true)
   const [removing, setRemoving] = useState<string | null>(null)
   const [clearing, setClearing] = useState(false)
+  const [updating, setUpdating] = useState<string | null>(null)
   const router = useRouter()
 
   // Mock user ID - in real app, get from auth context
-  const userId = '550e8400-e29b-41d4-a716-446655440001'
+  const userId = '550e8400-e29b-41d4-a716-446655440007'
 
   useEffect(() => {
     loadCartItems()
@@ -49,14 +62,17 @@ export default function CartPage() {
     setLoading(true)
     try {
       const response = await getCartItems(userId)
+      
       if (response.success && response.data) {
         setCartItems(response.data)
       } else {
         message.error('Erro ao carregar carrinho')
+        setCartItems([])
       }
     } catch (error) {
-      console.error('Error loading cart:', error)
+      console.error('Error loading cart items:', error)
       message.error('Erro ao conectar com o servidor')
+      setCartItems([])
     } finally {
       setLoading(false)
     }
@@ -98,21 +114,37 @@ export default function CartPage() {
     }
   }
 
+  const handleUpdateQuantity = async (productId: string, quantity: number) => {
+    if (quantity < 1) return
+    
+    setUpdating(productId)
+    try {
+      const response = await updateCartItemQuantity(userId, productId, quantity)
+      if (response.success) {
+        loadCartItems()
+      } else {
+        message.error(response.error || 'Erro ao atualizar quantidade')
+      }
+    } catch (error) {
+      console.error('Error updating quantity:', error)
+      message.error('Erro ao atualizar quantidade')
+    } finally {
+      setUpdating(null)
+    }
+  }
+
   const handleCheckout = () => {
     if (cartItems.length === 0) {
-      message.warning('Carrinho vazio')
+      message.warning('Seu carrinho está vazio')
       return
     }
     
     // For multiple items, we'll create a checkout session
-    const productIds = cartItems.map(item => item.product_id).join(',')
-    router.push(`/checkout/multiple?products=${productIds}`)
-  }
-
-  const calculateTotal = () => {
-    return cartItems.reduce((total, item) => {
-      return total + (item.product?.price || 0) * item.quantity
-    }, 0)
+    // For now, redirect to the first item's checkout page
+    const firstItem = cartItems[0]
+    if (firstItem.product) {
+      router.push(`/checkout/${firstItem.product.id}`)
+    }
   }
 
   const formatPrice = (price: number) => {
@@ -121,6 +153,13 @@ export default function CartPage() {
       currency: 'BRL'
     }).format(price)
   }
+
+  // Calculate totals
+  const subtotal = cartItems.reduce((sum, item) => {
+    return sum + (item.product?.price || 0) * item.quantity
+  }, 0)
+
+  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0)
 
   if (loading) {
     return (
@@ -139,9 +178,8 @@ export default function CartPage() {
       <div className="max-w-4xl mx-auto py-8">
         {/* Header */}
         <div className="mb-8">
-          <Title level={2}>
-            <ShoppingCartOutlined className="mr-3" />
-            Meu Carrinho
+          <Title level={2} className="mb-2">
+            Carrinho de Compras
           </Title>
           <Paragraph className="text-gray-600">
             Revise seus itens antes de finalizar a compra
@@ -155,7 +193,7 @@ export default function CartPage() {
               description={
                 <div>
                   <Title level={4}>Seu carrinho está vazio</Title>
-                  <Paragraph>Explore nosso catálogo e adicione materiais educacionais incríveis!</Paragraph>
+                  <Paragraph>Adicione alguns materiais educacionais para começar</Paragraph>
                 </div>
               }
             >
@@ -171,19 +209,18 @@ export default function CartPage() {
             {/* Cart Items */}
             <Col xs={24} lg={16}>
               <Card 
-                title={`${cartItems.length} ${cartItems.length === 1 ? 'item' : 'itens'} no carrinho`}
+                title={`Itens no Carrinho (${totalItems})`}
                 extra={
                   <Popconfirm
-                    title="Limpar carrinho"
-                    description="Tem certeza que deseja remover todos os itens?"
+                    title="Tem certeza que deseja limpar o carrinho?"
                     onConfirm={handleClearCart}
                     okText="Sim"
                     cancelText="Não"
                   >
                     <Button 
-                      danger 
+                      icon={<ClearOutlined />} 
                       loading={clearing}
-                      icon={<DeleteOutlined />}
+                      danger
                     >
                       Limpar Carrinho
                     </Button>
@@ -191,24 +228,23 @@ export default function CartPage() {
                 }
               >
                 <List
-                  itemLayout="horizontal"
                   dataSource={cartItems}
                   renderItem={(item) => (
                     <List.Item
+                      key={item.id}
                       actions={[
                         <Popconfirm
                           key="remove"
-                          title="Remover item"
-                          description="Tem certeza que deseja remover este item?"
+                          title="Remover este item do carrinho?"
                           onConfirm={() => handleRemoveItem(item.product_id)}
                           okText="Sim"
                           cancelText="Não"
                         >
                           <Button 
-                            danger 
-                            type="text"
-                            icon={<DeleteOutlined />}
+                            icon={<DeleteOutlined />} 
                             loading={removing === item.product_id}
+                            danger
+                            size="small"
                           >
                             Remover
                           </Button>
@@ -217,37 +253,63 @@ export default function CartPage() {
                     >
                       <List.Item.Meta
                         avatar={
-                          <div className="w-16 h-16 bg-gray-200 rounded-lg flex items-center justify-center">
+                          <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center">
                             <BookOutlined className="text-2xl text-gray-400" />
                           </div>
                         }
                         title={
-                          <Link href={`/produtos/${item.product_id}`}>
-                            <span className="hover:text-blue-600 cursor-pointer">
-                              {item.product?.title}
-                            </span>
-                          </Link>
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <Link href={`/produtos/${item.product?.id}`}>
+                                <span className="text-lg font-semibold hover:text-blue-600">
+                                  {item.product?.title || 'Produto não encontrado'}
+                                </span>
+                              </Link>
+                              <div className="flex items-center space-x-2 mt-1">
+                                <Tag color="blue">{item.product?.category}</Tag>
+                                <Tag color="green">{item.product?.subject}</Tag>
+                              </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-xl font-bold text-green-600">
+                                {formatPrice((item.product?.price || 0) * item.quantity)}
+                              </div>
+                              <div className="text-sm text-gray-500">
+                                {formatPrice(item.product?.price || 0)} cada
+                              </div>
+                            </div>
+                          </div>
                         }
                         description={
-                          <div className="space-y-2">
-                            <div className="flex items-center space-x-2">
-                              <UserOutlined className="text-gray-400" />
-                              <Text className="text-sm text-gray-600">
-                                {item.product?.author?.name}
-                              </Text>
-                            </div>
+                          <div className="mt-3">
+                            <Paragraph className="text-gray-600 mb-3">
+                              {item.product?.description}
+                            </Paragraph>
+                            
                             <div className="flex items-center justify-between">
-                              <Text strong className="text-lg text-blue-600">
-                                {formatPrice(item.product?.price || 0)}
-                              </Text>
+                              <div className="flex items-center space-x-4">
+                                <div className="flex items-center space-x-1">
+                                  <Avatar size="small" icon={<UserOutlined />} />
+                                  <span className="text-sm text-gray-600">
+                                    {item.product?.author?.name}
+                                  </span>
+                                </div>
+                              </div>
+                              
                               <div className="flex items-center space-x-2">
                                 <Text>Quantidade:</Text>
                                 <InputNumber
                                   min={1}
-                                  max={1}
+                                  max={10}
                                   value={item.quantity}
-                                  disabled
+                                  onChange={(value) => {
+                                    if (value) {
+                                      handleUpdateQuantity(item.product_id, value)
+                                    }
+                                  }}
+                                  loading={updating === item.product_id}
                                   size="small"
+                                  style={{ width: 80 }}
                                 />
                               </div>
                             </div>
@@ -265,8 +327,8 @@ export default function CartPage() {
               <Card title="Resumo do Pedido" className="sticky top-4">
                 <div className="space-y-4">
                   <div className="flex justify-between">
-                    <Text>Subtotal ({cartItems.length} {cartItems.length === 1 ? 'item' : 'itens'}):</Text>
-                    <Text strong>{formatPrice(calculateTotal())}</Text>
+                    <Text>Subtotal ({totalItems} {totalItems === 1 ? 'item' : 'itens'}):</Text>
+                    <Text strong>{formatPrice(subtotal)}</Text>
                   </div>
                   
                   <div className="flex justify-between">
@@ -277,23 +339,24 @@ export default function CartPage() {
                   <Divider />
                   
                   <div className="flex justify-between">
-                    <Title level={4}>Total:</Title>
-                    <Title level={4} className="text-blue-600">
-                      {formatPrice(calculateTotal())}
-                    </Title>
+                    <Text strong className="text-lg">Total:</Text>
+                    <Text strong className="text-lg text-green-600">
+                      {formatPrice(subtotal)}
+                    </Text>
                   </div>
                   
-                  <Button 
-                    type="primary" 
-                    size="large" 
-                    block
+                  <Button
+                    type="primary"
+                    size="large"
                     icon={<CreditCardOutlined />}
                     onClick={handleCheckout}
+                    block
+                    className="mt-6"
                   >
                     Finalizar Compra
                   </Button>
                   
-                  <div className="text-center">
+                  <div className="text-center mt-4">
                     <Link href="/produtos">
                       <Button type="link">
                         Continuar Comprando
@@ -301,16 +364,17 @@ export default function CartPage() {
                     </Link>
                   </div>
                 </div>
-              </Card>
 
-              {/* Security Info */}
-              <Card className="mt-4">
-                <div className="text-center space-y-2">
-                  <div className="text-green-600 text-2xl">🔒</div>
-                  <Title level={5}>Compra Segura</Title>
-                  <Paragraph className="text-sm text-gray-600">
-                    Seus dados estão protegidos com criptografia SSL
-                  </Paragraph>
+                <Divider />
+
+                <div className="space-y-3">
+                  <Title level={5}>Informações da Compra</Title>
+                  <div className="text-sm text-gray-600 space-y-2">
+                    <div>✓ Download imediato após pagamento</div>
+                    <div>✓ Acesso vitalício aos materiais</div>
+                    <div>✓ Suporte técnico incluído</div>
+                    <div>✓ Garantia de satisfação</div>
+                  </div>
                 </div>
               </Card>
             </Col>

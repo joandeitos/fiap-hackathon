@@ -48,6 +48,7 @@ export default function ProductsPage() {
   const [filterDrawerVisible, setFilterDrawerVisible] = useState(false)
   const [categories, setCategories] = useState<string[]>([])
   const [subjects, setSubjects] = useState<string[]>([])
+
   const pageSize = 12
 
   const gradeLevels = ['1º ano', '2º ano', '3º ano', '4º ano', '5º ano', '6º ano', '7º ano', '8º ano', '9º ano']
@@ -56,12 +57,12 @@ export default function ProductsPage() {
   useEffect(() => {
     loadCategories()
     loadSubjects()
-    loadMockProducts() // Load mock data immediately
+    loadProducts() // Load real data from Supabase
   }, [])
 
   // Load products when filters change
   useEffect(() => {
-    loadMockProducts()
+    loadProducts()
   }, [currentPage, searchTerm, selectedCategory, selectedSubject, priceRange, selectedGradeLevels])
 
   const loadCategories = async () => {
@@ -70,7 +71,7 @@ export default function ProductsPage() {
       if (response.success && response.data) {
         setCategories(response.data)
       } else {
-        // Mock categories
+        // Fallback categories
         setCategories(['Planos de Aula', 'Atividades', 'Experimentos', 'Material Didático', 'Jogos Educativos', 'Arte e Criatividade'])
       }
     } catch (error) {
@@ -85,7 +86,7 @@ export default function ProductsPage() {
       if (response.success && response.data) {
         setSubjects(response.data)
       } else {
-        // Mock subjects
+        // Fallback subjects
         setSubjects(['Matemática', 'Português', 'Ciências', 'História', 'Geografia', 'Arte', 'Educação Física'])
       }
     } catch (error) {
@@ -94,188 +95,38 @@ export default function ProductsPage() {
     }
   }
 
-  const loadMockProducts = () => {
+  const loadProducts = async () => {
     setLoading(true)
-    
-    const mockProducts: Product[] = [
-      {
-        id: 1,
-        title: 'Plano de Aula: Matemática Básica - Frações',
-        description: 'Conjunto completo de atividades para ensinar frações de forma lúdica e interativa. Inclui exercícios práticos, jogos educativos e avaliações formativas.',
-        price: 15.90,
-        category: 'Planos de Aula',
-        subject: 'Matemática',
-        gradeLevel: ['4º ano', '5º ano'],
-        rating: 4.8,
-        reviewCount: 24,
-        downloadCount: 156,
-        author: {
-          id: 1,
-          name: 'Prof. Maria Silva',
-          email: 'maria@email.com',
-          rating: 4.9
-        },
-        thumbnailUrl: '/api/placeholder/300/200',
-        tags: ['Frações', 'Matemática Básica', 'Ensino Fundamental'],
-        createdAt: '2025-01-10T00:00:00Z',
-        updatedAt: '2025-01-10T00:00:00Z',
-        status: 'active',
-        totalRevenue: 0
-      },
-      {
-        id: 2,
-        title: 'Atividades de Português - Interpretação de Texto',
-        description: 'Material completo para desenvolver habilidades de interpretação textual com textos variados e questões elaboradas.',
-        price: 12.50,
-        category: 'Atividades',
-        subject: 'Português',
-        gradeLevel: ['3º ano', '4º ano', '5º ano'],
-        rating: 4.6,
-        reviewCount: 18,
-        downloadCount: 89,
-        author: {
-          id: 2,
-          name: 'Prof. Ana Costa',
-          email: 'ana@email.com',
-          rating: 4.7
-        },
-        thumbnailUrl: '/api/placeholder/300/200',
-        tags: ['Interpretação', 'Leitura', 'Português'],
-        createdAt: '2025-01-08T00:00:00Z',
-        updatedAt: '2025-01-08T00:00:00Z',
-        status: 'active',
-        totalRevenue: 0
-      },
-      {
-        id: 3,
-        title: 'Experimentos de Ciências - Sistema Solar',
-        description: 'Atividades práticas e experimentos para ensinar sobre o sistema solar de forma divertida e educativa.',
-        price: 18.90,
-        category: 'Experimentos',
-        subject: 'Ciências',
-        gradeLevel: ['4º ano', '5º ano', '6º ano'],
-        rating: 4.9,
-        reviewCount: 32,
-        downloadCount: 124,
-        author: {
-          id: 3,
-          name: 'Prof. Carlos Santos',
-          email: 'carlos@email.com',
-          rating: 4.8
-        },
-        thumbnailUrl: '/api/placeholder/300/200',
-        tags: ['Sistema Solar', 'Experimentos', 'Astronomia'],
-        createdAt: '2025-01-05T00:00:00Z',
-        updatedAt: '2025-01-05T00:00:00Z',
-        status: 'active',
-        totalRevenue: 0
-      },
-      {
-        id: 4,
-        title: 'História do Brasil - Linha do Tempo',
-        description: 'Material didático com linha do tempo interativa da história do Brasil, incluindo atividades e exercícios.',
-        price: 22.00,
-        category: 'Material Didático',
-        subject: 'História',
-        gradeLevel: ['6º ano', '7º ano', '8º ano'],
-        rating: 4.7,
-        reviewCount: 15,
-        downloadCount: 67,
-        author: {
-          id: 4,
-          name: 'Prof. Lucia Ferreira',
-          email: 'lucia@email.com',
-          rating: 4.6
-        },
-        thumbnailUrl: '/api/placeholder/300/200',
-        tags: ['História do Brasil', 'Linha do Tempo', 'Ensino Fundamental'],
-        createdAt: '2025-01-03T00:00:00Z',
-        updatedAt: '2025-01-03T00:00:00Z',
-        status: 'active',
-        totalRevenue: 0
-      },
-      {
-        id: 5,
-        title: 'Jogos Educativos - Tabuada Divertida',
-        description: 'Coleção de jogos e atividades lúdicas para ensinar e praticar a tabuada de multiplicação.',
-        price: 14.90,
-        category: 'Jogos Educativos',
-        subject: 'Matemática',
-        gradeLevel: ['2º ano', '3º ano', '4º ano'],
-        rating: 4.5,
-        reviewCount: 28,
-        downloadCount: 198,
-        author: {
-          id: 5,
-          name: 'Prof. Roberto Lima',
-          email: 'roberto@email.com',
-          rating: 4.4
-        },
-        thumbnailUrl: '/api/placeholder/300/200',
-        tags: ['Tabuada', 'Jogos', 'Multiplicação'],
-        createdAt: '2025-01-01T00:00:00Z',
-        updatedAt: '2025-01-01T00:00:00Z',
-        status: 'active',
-        totalRevenue: 0
-      },
-      {
-        id: 6,
-        title: 'Arte e Criatividade - Técnicas de Pintura',
-        description: 'Guia completo com técnicas de pintura para crianças, incluindo materiais necessários e passo a passo.',
-        price: 16.50,
-        category: 'Arte e Criatividade',
-        subject: 'Arte',
-        gradeLevel: ['1º ano', '2º ano', '3º ano', '4º ano'],
-        rating: 4.8,
-        reviewCount: 21,
-        downloadCount: 76,
-        author: {
-          id: 6,
-          name: 'Prof. Marina Oliveira',
-          email: 'marina@email.com',
-          rating: 4.9
-        },
-        thumbnailUrl: '/api/placeholder/300/200',
-        tags: ['Pintura', 'Arte', 'Criatividade'],
-        createdAt: '2024-12-28T00:00:00Z',
-        updatedAt: '2024-12-28T00:00:00Z',
-        status: 'active',
-        totalRevenue: 0
+    try {
+      const params = {
+        page: currentPage,
+        per_page: pageSize,
+        search: searchTerm || undefined,
+        category: selectedCategory !== 'all' ? selectedCategory : undefined,
+        subject: selectedSubject !== 'all' ? selectedSubject : undefined,
+        min_price: priceRange[0],
+        max_price: priceRange[1],
+        grade_levels: selectedGradeLevels.length > 0 ? selectedGradeLevels : undefined
       }
-    ]
 
-    // Apply filters to mock data
-    let filteredProducts = mockProducts
-
-    if (searchTerm) {
-      filteredProducts = filteredProducts.filter(product =>
-        product.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-      )
+      const response = await getProducts(params)
+      
+      if (response.success && response.data) {
+        setProducts(response.data.items || [])
+        setTotalProducts(response.data.pagination?.total || 0)
+      } else {
+        message.error('Erro ao carregar produtos')
+        setProducts([])
+        setTotalProducts(0)
+      }
+    } catch (error) {
+      console.error('Error loading products:', error)
+      message.error('Erro ao conectar com o servidor')
+      setProducts([])
+      setTotalProducts(0)
+    } finally {
+      setLoading(false)
     }
-
-    if (selectedCategory !== 'all') {
-      filteredProducts = filteredProducts.filter(product => product.category === selectedCategory)
-    }
-
-    if (selectedSubject !== 'all') {
-      filteredProducts = filteredProducts.filter(product => product.subject === selectedSubject)
-    }
-
-    if (selectedGradeLevels.length > 0) {
-      filteredProducts = filteredProducts.filter(product =>
-        product.gradeLevel.some(level => selectedGradeLevels.includes(level))
-      )
-    }
-
-    filteredProducts = filteredProducts.filter(product =>
-      product.price >= priceRange[0] && product.price <= priceRange[1]
-    )
-
-    setProducts(filteredProducts)
-    setTotalProducts(filteredProducts.length)
-    setLoading(false)
   }
 
   const formatPrice = (price: number) => {
@@ -358,9 +209,10 @@ export default function ProductsPage() {
       </div>
 
       <Button 
+        type="default" 
+        icon={<ClearOutlined />} 
         onClick={clearFilters}
-        icon={<ClearOutlined />}
-        className="w-full"
+        block
       >
         Limpar Filtros
       </Button>
@@ -369,154 +221,190 @@ export default function ProductsPage() {
 
   return (
     <AppLayout>
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto py-8">
         {/* Header */}
-        <div className="text-center mb-8">
-          <Title level={2}>Catálogo de Materiais Educacionais</Title>
-          <Paragraph className="text-lg text-gray-600">
-            Descubra recursos incríveis criados por professores para professores
-          </Paragraph>
+        <div className="mb-8">
+          <div className="text-center mb-6">
+            <div className="inline-flex items-center px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-medium mb-4">
+              <BookOutlined className="mr-2" />
+              Catálogo Completo
+            </div>
+            <Title level={1} className="mb-4">
+              Materiais Educacionais
+            </Title>
+            <Paragraph className="text-lg text-gray-600 max-w-2xl mx-auto">
+              Explore nossa coleção de recursos educacionais criados por professores experientes
+            </Paragraph>
+          </div>
+
+          {/* Search and Filters */}
+          <Row gutter={[16, 16]} align="middle">
+            <Col xs={24} md={16} lg={18}>
+              <Input
+                size="large"
+                placeholder="Buscar por título, descrição ou tags..."
+                prefix={<SearchOutlined />}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                allowClear
+              />
+            </Col>
+            <Col xs={24} md={8} lg={6}>
+              <Button
+                type="primary"
+                icon={<FilterOutlined />}
+                onClick={() => setFilterDrawerVisible(true)}
+                className="w-full md:w-auto"
+                size="large"
+              >
+                Filtros
+              </Button>
+            </Col>
+          </Row>
         </div>
 
-        {/* Search and Results Count */}
-        <Row gutter={[16, 16]} className="mb-6">
-          <Col xs={24} md={16}>
-            <Input
-              size="large"
-              placeholder="Buscar materiais educacionais..."
-              prefix={<SearchOutlined />}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </Col>
-          <Col xs={24} md={8} className="flex justify-between items-center">
-            <Text strong>{totalProducts} materiais encontrados</Text>
-            <Button
-              icon={<FilterOutlined />}
-              onClick={() => setFilterDrawerVisible(true)}
-              className="md:hidden"
-            >
-              Filtros
-            </Button>
-          </Col>
-        </Row>
-
-        <Row gutter={[24, 24]}>
-          {/* Filters Sidebar - Desktop */}
-          <Col xs={0} md={6}>
-            <Card title="Filtros" className="sticky top-4">
-              <FilterContent />
-            </Card>
-          </Col>
-
-          {/* Products Grid */}
-          <Col xs={24} md={18}>
-            {loading ? (
-              <div className="text-center py-12">
-                <Spin size="large" />
-              </div>
-            ) : products.length === 0 ? (
-              <Empty
-                image={Empty.PRESENTED_IMAGE_SIMPLE}
-                description={
-                  <div>
-                    <Title level={4}>Nenhum material encontrado</Title>
-                    <Paragraph>Tente ajustar os filtros ou termos de busca</Paragraph>
-                  </div>
-                }
-              />
-            ) : (
-              <>
-                <Row gutter={[16, 16]}>
-                  {products.map(product => (
-                    <Col key={product.id} xs={24} sm={12} lg={8}>
-                      <Card
-                        hoverable
-                        cover={
-                          <div className="h-48 bg-gray-200 flex items-center justify-center">
-                            <BookOutlined className="text-4xl text-gray-400" />
-                          </div>
-                        }
-                        actions={[
-                          <Link key="view" href={`/produtos/${product.id}`}>
-                            <Button type="primary" block>
-                              Ver Detalhes
-                            </Button>
-                          </Link>
-                        ]}
-                      >
-                        <div className="space-y-3">
-                          <div>
-                            <Space wrap>
-                              <Tag color="blue">{product.category}</Tag>
-                              <Tag color="green">{product.subject}</Tag>
-                            </Space>
-                          </div>
-
-                          <Title level={5} className="line-clamp-2">
-                            {product.title}
-                          </Title>
-
-                          <Paragraph className="text-gray-600 line-clamp-2">
-                            {product.description}
-                          </Paragraph>
-
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                              <Rate disabled defaultValue={product.rating} allowHalf size="small" />
-                              <Text className="text-sm text-gray-500">
-                                ({product.reviewCount})
-                              </Text>
-                            </div>
-                            <div className="flex items-center space-x-1 text-gray-500">
-                              <DownloadOutlined />
-                              <Text className="text-sm">{product.downloadCount}</Text>
-                            </div>
-                          </div>
-
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                              <UserOutlined className="text-gray-400" />
-                              <Text className="text-sm">{product.author.name}</Text>
-                            </div>
-                            <Text strong className="text-lg text-blue-600">
-                              {formatPrice(product.price)}
-                            </Text>
-                          </div>
-                        </div>
-                      </Card>
-                    </Col>
-                  ))}
-                </Row>
-
-                {/* Pagination */}
-                {totalProducts > pageSize && (
-                  <div className="text-center mt-8">
-                    <Pagination
-                      current={currentPage}
-                      total={totalProducts}
-                      pageSize={pageSize}
-                      onChange={setCurrentPage}
-                      showSizeChanger={false}
-                      showQuickJumper
-                      showTotal={(total, range) =>
-                        `${range[0]}-${range[1]} de ${total} materiais`
-                      }
-                    />
-                  </div>
-                )}
-              </>
+        {/* Results */}
+        <div className="mb-6">
+          <div className="flex justify-between items-center">
+            <Text className="text-gray-600">
+              {loading ? 'Carregando...' : `${totalProducts} ${totalProducts === 1 ? 'material encontrado' : 'materiais encontrados'}`}
+            </Text>
+            {(selectedCategory !== 'all' || selectedSubject !== 'all' || selectedGradeLevels.length > 0 || searchTerm) && (
+              <Button type="link" onClick={clearFilters} icon={<ClearOutlined />}>
+                Limpar Filtros
+              </Button>
             )}
-          </Col>
-        </Row>
+          </div>
+        </div>
 
-        {/* Mobile Filter Drawer */}
+        {/* Products Grid */}
+        {loading ? (
+          <div className="text-center py-12">
+            <Spin size="large" />
+          </div>
+        ) : products.length === 0 ? (
+          <Empty
+            image={<BookOutlined className="text-6xl text-gray-300" />}
+            description={
+              <div>
+                <Title level={4}>Nenhum material encontrado</Title>
+                <Paragraph>Tente ajustar os filtros ou buscar por outros termos</Paragraph>
+              </div>
+            }
+          >
+            <Button type="primary" onClick={clearFilters}>
+              Limpar Filtros
+            </Button>
+          </Empty>
+        ) : (
+          <>
+            <Row gutter={[24, 24]}>
+              {products.map((product) => (
+                <Col key={product.id} xs={24} sm={12} lg={8} xl={6}>
+                  <Card
+                    hoverable
+                    className="h-full"
+                    cover={
+                      <div className="h-48 bg-gradient-to-br from-blue-100 to-purple-100 flex items-center justify-center">
+                        <BookOutlined className="text-4xl text-gray-400" />
+                      </div>
+                    }
+                    actions={[
+                      <Link key="view" href={`/produtos/${product.id}`}>
+                        <Button type="primary" size="small">
+                          Ver Detalhes
+                        </Button>
+                      </Link>
+                    ]}
+                  >
+                    <div className="space-y-3">
+                      <div>
+                        <Title level={5} className="mb-2 line-clamp-2">
+                          {product.title}
+                        </Title>
+                        <Paragraph className="text-sm text-gray-600 line-clamp-2 mb-3">
+                          {product.description}
+                        </Paragraph>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <UserOutlined className="text-gray-400" />
+                          <Text className="text-sm text-gray-600">
+                            {product.author?.name}
+                          </Text>
+                        </div>
+                        <div className="flex items-center space-x-1">
+                          <Rate disabled defaultValue={product.rating} size="small" />
+                          <Text className="text-xs text-gray-500">
+                            ({product.review_count})
+                          </Text>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <DownloadOutlined className="text-gray-400" />
+                          <Text className="text-sm text-gray-600">
+                            {product.download_count} downloads
+                          </Text>
+                        </div>
+                        <Text strong className="text-lg text-blue-600">
+                          {formatPrice(product.price)}
+                        </Text>
+                      </div>
+
+                      <div className="flex flex-wrap gap-1">
+                        <Tag color="blue">{product.category}</Tag>
+                        <Tag color="green">{product.subject}</Tag>
+                      </div>
+
+                      {product.grade_level && product.grade_level.length > 0 && (
+                        <div className="flex flex-wrap gap-1">
+                          {product.grade_level.slice(0, 2).map((level) => (
+                            <Tag key={level} color="orange" size="small">
+                              {level}
+                            </Tag>
+                          ))}
+                          {product.grade_level.length > 2 && (
+                            <Tag color="orange" size="small">
+                              +{product.grade_level.length - 2}
+                            </Tag>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </Card>
+                </Col>
+              ))}
+            </Row>
+
+            {/* Pagination */}
+            {totalProducts > pageSize && (
+              <div className="text-center mt-8">
+                <Pagination
+                  current={currentPage}
+                  total={totalProducts}
+                  pageSize={pageSize}
+                  onChange={setCurrentPage}
+                  showSizeChanger={false}
+                  showQuickJumper
+                  showTotal={(total, range) =>
+                    `${range[0]}-${range[1]} de ${total} materiais`
+                  }
+                />
+              </div>
+            )}
+          </>
+        )}
+
+        {/* Filter Drawer */}
         <Drawer
           title="Filtros"
           placement="right"
           onClose={() => setFilterDrawerVisible(false)}
           open={filterDrawerVisible}
-          width={300}
+          width={320}
         >
           <FilterContent />
         </Drawer>

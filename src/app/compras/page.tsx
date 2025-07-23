@@ -15,7 +15,8 @@ import {
   message,
   Spin,
   Modal,
-  Input
+  Input,
+  Form
 } from 'antd'
 import { 
   DownloadOutlined,
@@ -23,27 +24,27 @@ import {
   StarOutlined,
   UserOutlined,
   CalendarOutlined,
-  DollarOutlined
+  DollarOutlined,
+  ShoppingOutlined
 } from '@ant-design/icons'
 import Link from 'next/link'
 import AppLayout from '@/components/Layout/AppLayout'
+import { getUserSales, createReview, Product } from '@/lib/api'
 
 const { Title, Paragraph } = Typography
 const { TextArea } = Input
 
 interface Purchase {
-  id: number
-  productTitle: string
-  productDescription: string
-  authorName: string
-  authorAvatar?: string
+  id: string
   amount: number
-  purchaseDate: string
-  category: string
-  downloadCount: number
-  userRating?: number
-  userReview?: string
-  status: 'completed' | 'processing' | 'failed'
+  status: string
+  payment_method: string
+  transaction_id?: string
+  product?: Product
+  buyer_id: string
+  seller_id: string
+  created_at: string
+  updated_at: string
 }
 
 export default function ComprasPage() {
@@ -51,118 +52,93 @@ export default function ComprasPage() {
   const [loading, setLoading] = useState(true)
   const [reviewModalVisible, setReviewModalVisible] = useState(false)
   const [selectedPurchase, setSelectedPurchase] = useState<Purchase | null>(null)
-  const [reviewRating, setReviewRating] = useState(0)
-  const [reviewText, setReviewText] = useState('')
+  const [submittingReview, setSubmittingReview] = useState(false)
+  const [form] = Form.useForm()
 
-  // Dados mock de compras
-  const mockPurchases: Purchase[] = [
-    {
-      id: 1,
-      productTitle: 'Jogos Matemáticos para Ensino Fundamental',
-      productDescription: 'Conjunto completo de jogos educativos para ensinar matemática de forma divertida',
-      authorName: 'Prof. Maria Silva',
-      authorAvatar: undefined,
-      amount: 25.00,
-      purchaseDate: '2025-01-20',
-      category: 'Matemática',
-      downloadCount: 3,
-      userRating: 5,
-      userReview: 'Excelente material! Meus alunos adoraram os jogos.',
-      status: 'completed'
-    },
-    {
-      id: 2,
-      productTitle: 'Planos de Aula - História do Brasil',
-      productDescription: 'Planos detalhados sobre a história do Brasil para ensino médio',
-      authorName: 'Prof. João Santos',
-      authorAvatar: undefined,
-      amount: 30.00,
-      purchaseDate: '2025-01-18',
-      category: 'História',
-      downloadCount: 1,
-      userRating: 4,
-      userReview: 'Muito bom, mas poderia ter mais atividades práticas.',
-      status: 'completed'
-    },
-    {
-      id: 3,
-      productTitle: 'Experimentos de Química - Ensino Médio',
-      productDescription: 'Roteiros de experimentos práticos para aulas de química',
-      authorName: 'Prof. Ana Costa',
-      authorAvatar: undefined,
-      amount: 35.00,
-      purchaseDate: '2025-01-15',
-      category: 'Ciências',
-      downloadCount: 2,
-      status: 'completed'
-    },
-    {
-      id: 4,
-      productTitle: 'Atividades de Português - Interpretação',
-      productDescription: 'Exercícios variados de interpretação de texto',
-      authorName: 'Prof. Carlos Lima',
-      authorAvatar: undefined,
-      amount: 20.00,
-      purchaseDate: '2025-01-12',
-      category: 'Português',
-      downloadCount: 0,
-      status: 'processing'
-    }
-  ]
+  // Simulated current user ID (in real app, get from auth context)
+  const currentUserId = '550e8400-e29b-41d4-a716-446655440007'
 
   useEffect(() => {
-    const fetchPurchases = async () => {
-      try {
-        setLoading(true)
-        // Simular carregamento da API
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        setPurchases(mockPurchases)
-        message.info('Exibindo histórico de compras')
-      } catch (error) {
-        console.error('Erro ao carregar compras:', error)
-        setPurchases(mockPurchases)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchPurchases()
+    loadPurchases()
   }, [])
 
-  const handleDownload = (purchase: Purchase) => {
-    message.success(`Download iniciado: ${purchase.productTitle}`)
-    // Aqui seria implementado o download real
+  const loadPurchases = async () => {
+    setLoading(true)
+    try {
+      // Get purchases where current user is the buyer
+      const response = await getUserSales(currentUserId, 'buyer')
+      
+      if (response.success && response.data) {
+        setPurchases(response.data)
+      } else {
+        message.error('Erro ao carregar compras')
+        setPurchases([])
+      }
+    } catch (error) {
+      console.error('Error loading purchases:', error)
+      message.error('Erro ao conectar com o servidor')
+      setPurchases([])
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleReview = (purchase: Purchase) => {
     setSelectedPurchase(purchase)
-    setReviewRating(purchase.userRating || 0)
-    setReviewText(purchase.userReview || '')
     setReviewModalVisible(true)
   }
 
-  const handleSubmitReview = () => {
-    if (selectedPurchase) {
-      // Atualizar a avaliação localmente
-      const updatedPurchases = purchases.map(p => 
-        p.id === selectedPurchase.id 
-          ? { ...p, userRating: reviewRating, userReview: reviewText }
-          : p
-      )
-      setPurchases(updatedPurchases)
-      message.success('Avaliação salva com sucesso!')
-      setReviewModalVisible(false)
-      setSelectedPurchase(null)
-      setReviewRating(0)
-      setReviewText('')
+  const handleSubmitReview = async (values: any) => {
+    if (!selectedPurchase?.product) return
+    
+    setSubmittingReview(true)
+    try {
+      const response = await createReview({
+        product_id: selectedPurchase.product.id,
+        user_id: currentUserId,
+        rating: values.rating,
+        comment: values.comment
+      })
+      
+      if (response.success) {
+        message.success('Avaliação enviada com sucesso!')
+        setReviewModalVisible(false)
+        form.resetFields()
+        setSelectedPurchase(null)
+        // Reload purchases to get updated data
+        loadPurchases()
+      } else {
+        message.error(response.error || 'Erro ao enviar avaliação')
+      }
+    } catch (error) {
+      console.error('Error submitting review:', error)
+      message.error('Erro ao enviar avaliação')
+    } finally {
+      setSubmittingReview(false)
     }
+  }
+
+  const formatPrice = (price: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(price)
+  }
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('pt-BR', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    })
   }
 
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'completed': return 'green'
-      case 'processing': return 'orange'
-      case 'failed': return 'red'
+      case 'pending': return 'orange'
+      case 'cancelled': return 'red'
+      case 'refunded': return 'purple'
       default: return 'default'
     }
   }
@@ -170,230 +146,311 @@ export default function ComprasPage() {
   const getStatusText = (status: string) => {
     switch (status) {
       case 'completed': return 'Concluída'
-      case 'processing': return 'Processando'
-      case 'failed': return 'Falhou'
-      default: return 'Desconhecido'
+      case 'pending': return 'Processando'
+      case 'cancelled': return 'Cancelada'
+      case 'refunded': return 'Reembolsada'
+      default: return status
     }
   }
+
+  const getPaymentMethodText = (method: string) => {
+    switch (method) {
+      case 'credit_card': return 'Cartão de Crédito'
+      case 'debit_card': return 'Cartão de Débito'
+      case 'pix': return 'PIX'
+      case 'bank_transfer': return 'Transferência Bancária'
+      default: return method
+    }
+  }
+
+  // Calculate statistics
+  const completedPurchases = purchases.filter(p => p.status === 'completed')
+  const totalSpent = completedPurchases.reduce((sum, purchase) => sum + purchase.amount, 0)
+  const totalMaterials = completedPurchases.length
 
   if (loading) {
     return (
       <AppLayout>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <Spin size="large" />
+        <div className="max-w-6xl mx-auto py-8">
+          <div className="text-center py-12">
+            <Spin size="large" />
+          </div>
         </div>
       </AppLayout>
     )
   }
 
-  const totalSpent = purchases
-    .filter(p => p.status === 'completed')
-    .reduce((sum, p) => sum + p.amount, 0)
-
   return (
     <AppLayout>
-      <div className="min-h-screen bg-gray-50 py-8">
-        <div className="max-w-6xl mx-auto px-4">
-          {/* Header */}
-          <div className="mb-8">
-            <Title level={2}>Minhas Compras</Title>
-            <p className="text-gray-600">Histórico de materiais adquiridos</p>
-          </div>
+      <div className="max-w-6xl mx-auto py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <Title level={2} className="mb-2">
+            Minhas Compras
+          </Title>
+          <Paragraph className="text-gray-600">
+            Acesse e gerencie todos os materiais educacionais que você adquiriu
+          </Paragraph>
+        </div>
 
-          {/* Resumo */}
-          <Row gutter={[24, 24]} className="mb-8">
-            <Col xs={24} sm={8}>
-              <Card>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600">
-                    {purchases.filter(p => p.status === 'completed').length}
-                  </div>
+        {/* Statistics */}
+        <Row gutter={[24, 24]} className="mb-8">
+          <Col xs={24} sm={8}>
+            <Card>
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
+                  <ShoppingOutlined className="text-2xl text-blue-600" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">{totalMaterials}</div>
                   <div className="text-gray-600">Materiais Adquiridos</div>
                 </div>
-              </Card>
-            </Col>
-            <Col xs={24} sm={8}>
-              <Card>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600">
-                    R$ {totalSpent.toFixed(2)}
-                  </div>
+              </div>
+            </Card>
+          </Col>
+          <Col xs={24} sm={8}>
+            <Card>
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
+                  <DollarOutlined className="text-2xl text-green-600" />
+                </div>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">{formatPrice(totalSpent)}</div>
                   <div className="text-gray-600">Total Investido</div>
                 </div>
-              </Card>
-            </Col>
-            <Col xs={24} sm={8}>
-              <Card>
-                <div className="text-center">
-                  <div className="text-2xl font-bold text-purple-600">
-                    {purchases.reduce((sum, p) => sum + p.downloadCount, 0)}
-                  </div>
-                  <div className="text-gray-600">Downloads Realizados</div>
+              </div>
+            </Card>
+          </Col>
+          <Col xs={24} sm={8}>
+            <Card>
+              <div className="flex items-center">
+                <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
+                  <DownloadOutlined className="text-2xl text-purple-600" />
                 </div>
-              </Card>
-            </Col>
-          </Row>
+                <div>
+                  <div className="text-2xl font-bold text-gray-900">
+                    {completedPurchases.reduce((sum, p) => sum + (p.product?.download_count || 0), 0)}
+                  </div>
+                  <div className="text-gray-600">Downloads Disponíveis</div>
+                </div>
+              </div>
+            </Card>
+          </Col>
+        </Row>
 
-          {/* Lista de Compras */}
-          <Card>
+        {/* Purchases List */}
+        <Card>
+          {purchases.length === 0 ? (
+            <div className="text-center py-12">
+              <ShoppingOutlined className="text-6xl text-gray-300 mb-4" />
+              <Title level={4} className="text-gray-500">
+                Nenhuma compra encontrada
+              </Title>
+              <Paragraph className="text-gray-400 mb-6">
+                Você ainda não adquiriu nenhum material educacional
+              </Paragraph>
+              <Link href="/produtos">
+                <Button type="primary" size="large">
+                  Explorar Materiais
+                </Button>
+              </Link>
+            </div>
+          ) : (
             <List
               itemLayout="vertical"
-              size="large"
-              pagination={{
-                pageSize: 5,
-                showSizeChanger: true,
-                showQuickJumper: true
-              }}
               dataSource={purchases}
+              pagination={{
+                pageSize: 10,
+                showSizeChanger: true,
+                showQuickJumper: true,
+                showTotal: (total, range) =>
+                  `${range[0]}-${range[1]} de ${total} compras`
+              }}
               renderItem={(purchase) => (
                 <List.Item
                   key={purchase.id}
                   actions={[
                     <Space key="actions">
                       {purchase.status === 'completed' && (
-                        <Button 
-                          type="primary" 
-                          icon={<DownloadOutlined />}
-                          onClick={() => handleDownload(purchase)}
-                        >
-                          Download
-                        </Button>
+                        <>
+                          <Button 
+                            type="primary" 
+                            icon={<DownloadOutlined />}
+                            onClick={() => {
+                              message.success('Download iniciado!')
+                            }}
+                          >
+                            Download
+                          </Button>
+                          <Button 
+                            icon={<StarOutlined />}
+                            onClick={() => handleReview(purchase)}
+                          >
+                            Avaliar
+                          </Button>
+                        </>
                       )}
-                      <Link href={`/produtos/${purchase.id}`}>
+                      <Link href={`/produtos/${purchase.product?.id}`}>
                         <Button icon={<EyeOutlined />}>
                           Ver Detalhes
                         </Button>
                       </Link>
-                      {purchase.status === 'completed' && (
-                        <Button 
-                          icon={<StarOutlined />}
-                          onClick={() => handleReview(purchase)}
-                        >
-                          {purchase.userRating ? 'Editar Avaliação' : 'Avaliar'}
-                        </Button>
-                      )}
                     </Space>
                   ]}
                 >
                   <List.Item.Meta
                     avatar={
-                      <Avatar 
-                        src={purchase.authorAvatar} 
-                        icon={<UserOutlined />}
-                        size={64}
-                      />
+                      <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-lg flex items-center justify-center">
+                        <UserOutlined className="text-2xl text-gray-400" />
+                      </div>
                     }
                     title={
-                      <div className="flex justify-between items-start">
-                        <span className="text-lg font-medium">{purchase.productTitle}</span>
-                        <Tag color={getStatusColor(purchase.status)}>
-                          {getStatusText(purchase.status)}
-                        </Tag>
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <Link href={`/produtos/${purchase.product?.id}`}>
+                            <span className="text-lg font-semibold hover:text-blue-600">
+                              {purchase.product?.title || 'Produto não encontrado'}
+                            </span>
+                          </Link>
+                          <div className="flex items-center space-x-2 mt-1">
+                            <Tag color={getStatusColor(purchase.status)}>
+                              {getStatusText(purchase.status)}
+                            </Tag>
+                            <Tag color="blue">{purchase.product?.category}</Tag>
+                            <Tag color="green">{purchase.product?.subject}</Tag>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xl font-bold text-green-600">
+                            {formatPrice(purchase.amount)}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {getPaymentMethodText(purchase.payment_method)}
+                          </div>
+                        </div>
                       </div>
                     }
                     description={
-                      <div className="space-y-2">
-                        <Paragraph className="text-gray-600 mb-2">
-                          {purchase.productDescription}
+                      <div className="mt-3">
+                        <Paragraph className="text-gray-600 mb-3">
+                          {purchase.product?.description}
                         </Paragraph>
-                        <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                          <span>
-                            <UserOutlined className="mr-1" />
-                            {purchase.authorName}
-                          </span>
-                          <span>
-                            <CalendarOutlined className="mr-1" />
-                            {purchase.purchaseDate}
-                          </span>
-                          <span>
-                            <DollarOutlined className="mr-1" />
-                            R$ {purchase.amount.toFixed(2)}
-                          </span>
-                          <Tag color="blue">{purchase.category}</Tag>
+                        
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-4">
+                            <div className="flex items-center space-x-1">
+                              <Avatar size="small" icon={<UserOutlined />} />
+                              <span className="text-sm text-gray-600">
+                                {purchase.product?.author?.name}
+                              </span>
+                            </div>
+                            
+                            <div className="flex items-center space-x-1">
+                              <CalendarOutlined className="text-gray-400" />
+                              <span className="text-sm text-gray-600">
+                                Comprado em {formatDate(purchase.created_at)}
+                              </span>
+                            </div>
+                            
+                            {purchase.product?.rating && (
+                              <div className="flex items-center space-x-1">
+                                <Rate 
+                                  disabled 
+                                  defaultValue={purchase.product.rating} 
+                                  size="small" 
+                                />
+                                <span className="text-sm text-gray-600">
+                                  ({purchase.product.review_count})
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          <div className="flex items-center space-x-4">
+                            <div className="flex items-center space-x-1">
+                              <DownloadOutlined className="text-gray-400" />
+                              <span className="text-sm text-gray-600">
+                                {purchase.product?.download_count || 0} downloads
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                        {purchase.downloadCount > 0 && (
-                          <div className="text-sm text-gray-500">
-                            <DownloadOutlined className="mr-1" />
-                            {purchase.downloadCount} download(s) realizados
-                          </div>
-                        )}
-                        {purchase.userRating && (
-                          <div className="flex items-center space-x-2">
-                            <Rate disabled defaultValue={purchase.userRating} size="small" />
-                            <span className="text-sm text-gray-500">
-                              Sua avaliação: {purchase.userRating}/5
-                            </span>
-                          </div>
-                        )}
-                        {purchase.userReview && (
-                          <div className="bg-gray-50 p-3 rounded-lg mt-2">
-                            <div className="text-sm font-medium text-gray-700 mb-1">
-                              Sua avaliação:
-                            </div>
-                            <div className="text-sm text-gray-600">
-                              &quot;{purchase.userReview}&quot;
-                            </div>
-                          </div>
-                        )}
                       </div>
                     }
                   />
                 </List.Item>
               )}
             />
-          </Card>
+          )}
+        </Card>
 
-          {/* Modal de Avaliação */}
-          <Modal
-            title="Avaliar Material"
-            open={reviewModalVisible}
-            onOk={handleSubmitReview}
-            onCancel={() => {
-              setReviewModalVisible(false)
-              setSelectedPurchase(null)
-              setReviewRating(0)
-              setReviewText('')
-            }}
-            okText="Salvar Avaliação"
-            cancelText="Cancelar"
+        {/* Review Modal */}
+        <Modal
+          title="Avaliar Material"
+          open={reviewModalVisible}
+          onCancel={() => {
+            setReviewModalVisible(false)
+            setSelectedPurchase(null)
+            form.resetFields()
+          }}
+          footer={null}
+          width={600}
+        >
+          {selectedPurchase && (
+            <div className="mb-6">
+              <Title level={5}>{selectedPurchase.product?.title}</Title>
+              <Paragraph className="text-gray-600">
+                Como foi sua experiência com este material?
+              </Paragraph>
+            </div>
+          )}
+          
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={handleSubmitReview}
           >
-            {selectedPurchase && (
-              <div className="space-y-4">
-                <div>
-                  <Title level={5}>{selectedPurchase.productTitle}</Title>
-                  <Paragraph className="text-gray-600">
-                    por {selectedPurchase.authorName}
-                  </Paragraph>
-                </div>
-                
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Sua avaliação:
-                  </label>
-                  <Rate 
-                    value={reviewRating} 
-                    onChange={setReviewRating}
-                    allowHalf
-                  />
-                </div>
+            <Form.Item
+              name="rating"
+              label="Avaliação"
+              rules={[{ required: true, message: 'Por favor, dê uma nota!' }]}
+            >
+              <Rate />
+            </Form.Item>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Comentário (opcional):
-                  </label>
-                  <TextArea
-                    rows={4}
-                    value={reviewText}
-                    onChange={(e) => setReviewText(e.target.value)}
-                    placeholder="Compartilhe sua experiência com este material..."
-                    maxLength={500}
-                    showCount
-                  />
-                </div>
+            <Form.Item
+              name="comment"
+              label="Comentário"
+              rules={[{ required: true, message: 'Por favor, escreva um comentário!' }]}
+            >
+              <TextArea
+                rows={4}
+                placeholder="Compartilhe sua experiência com este material. Como ele te ajudou? O que mais gostou?"
+              />
+            </Form.Item>
+
+            <Form.Item className="mb-0">
+              <div className="flex justify-end space-x-2">
+                <Button 
+                  onClick={() => {
+                    setReviewModalVisible(false)
+                    setSelectedPurchase(null)
+                    form.resetFields()
+                  }}
+                >
+                  Cancelar
+                </Button>
+                <Button 
+                  type="primary" 
+                  htmlType="submit"
+                  loading={submittingReview}
+                >
+                  Enviar Avaliação
+                </Button>
               </div>
-            )}
-          </Modal>
-        </div>
+            </Form.Item>
+          </Form>
+        </Modal>
       </div>
     </AppLayout>
   )
