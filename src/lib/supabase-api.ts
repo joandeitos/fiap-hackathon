@@ -502,3 +502,29 @@ export const createDatabaseFunctions = async () => {
   })
 }
 
+
+// Update cart item quantity
+export const updateCartItemQuantity = async (userId: string, productId: string, quantity: number): Promise<ApiResponse<CartItem>> => {
+  try {
+    const { data, error } = await supabase
+      .from('cart_items')
+      .update({ quantity })
+      .eq('user_id', userId)
+      .eq('product_id', productId)
+      .select(`
+        *,
+        product:products(*)
+      `)
+      .single()
+
+    if (error) {
+      return { success: false, error: error.message }
+    }
+
+    return { success: true, data }
+  } catch (error) {
+    console.error('Error updating cart item quantity:', error)
+    return { success: false, error: 'Erro interno do servidor' }
+  }
+}
+
