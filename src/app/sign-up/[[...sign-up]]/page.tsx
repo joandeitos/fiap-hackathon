@@ -3,12 +3,12 @@
 import { SignUp } from '@clerk/nextjs'
 import { Card, Typography, Row, Col } from 'antd'
 import { 
-  BookOutlined, 
-  DollarOutlined, 
-  UserOutlined,
+  BookOutlined,
   CheckCircleOutlined,
+  DollarOutlined,
+  SafetyOutlined,
   StarOutlined,
-  ShieldCheckOutlined
+  UserOutlined
 } from '@ant-design/icons'
 
 const { Title, Paragraph } = Typography
@@ -36,7 +36,7 @@ export default function SignUpPage() {
       description: 'Receba feedback valioso e melhore continuamente seus materiais'
     },
     {
-      icon: <ShieldCheckOutlined className="text-indigo-600 text-xl" />,
+      icon: <SafetyOutlined className="text-indigo-600 text-xl" />,
       title: 'Plataforma Segura',
       description: 'Transações protegidas e ambiente seguro para todos os usuários'
     }
